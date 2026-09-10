@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Sky Crash</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #fff; text-align: center; margin: 0; padding: 0; overflow-x: hidden; height: 100vh; display: flex; flex-direction: column; }
+        .hidden { display: none !important; }
+        #game-canvas-container { width: 100%; height: 40vh; position: relative; background: #000; box-shadow: 0 4px 15px rgba(0,0,0,0.7); }
+        #multiplier-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; font-weight: 800; color: #fff; pointer-events: none; text-shadow: 0 5px 15px rgba(0,0,0,0.8), 0 0 30px rgba(255,215,0,0.6); z-index: 10; }
+        #ui-overlay { flex: 1; display: flex; flex-direction: column; padding: 15px; background: #111827; border-top: 2px solid #374151; overflow-y: auto; }
+        .hud-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card { background: #1f2937; padding: 12px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); margin-bottom: 10px; }
+        button { padding: 12px 20px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; transition: all 0.2s ease; font-family: 'Poppins', sans-serif; text-transform: uppercase; }
+        button:active { transform: scale(0.96); }
+        .btn-primary { background: #f59e0b; color: #111; width: 100%; }
+        .btn-secondary { background: #6d28d9; color: #fff; font-size: 0.75rem; padding: 8px 12px; }
+        .btn-deposit { background: #10b981; color: #fff; width: 30%; font-size: 0.85rem; }
+        .bet-controls { display: flex; justify-content: center; gap: 8px; }
+        .bet-btn { background: #3b82f6; color: white; width: 30%; font-size: 1.1rem; }
+        #game-status { font-weight: 600; min-height: 20px; margin-top: 10px; font-size: 0.85rem; }
+        #auth-section { margin: auto; background: #1f2937; padding: 30px; border-radius: 16px; width: 85%; max-width: 320px; border: 1px solid #374151; }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 1rem; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <!-- AUTH SECTION -->
+    <div id="auth-section">
+        <h2 style="margin-bottom: 10px; color: #f59e0b;">✈️ Aviator Game</h2>
+        <p style="color:#9ca3af; font-size:0.85rem; margin-bottom: 20px;">Enter phone number to login or sign up.</p>
+        <input type="tel" id="phone" placeholder="Phone Number (10 digits)" maxlength="10">
+        <input type="password" id="password" placeholder="Password">
+        <button class="btn-primary" onclick="handleAuth()">Enter Game</button>
+    </div>
+
+    <!-- MAIN GAME DASHBOARD -->
+    <div id="game-section" class="hidden" style="display:flex; flex-direction:column; height:100vh;">
+        <div id="game-canvas-container">
+            <div id="multiplier-overlay">1.00X</div>
+            <canvas id="pixi-canvas"></canvas>
+        </div>
+
+        <div id="ui-overlay">
+            <div class="hud-row card">
+                <div style="text-align: left;">
+                    <div style="color: #9ca3af; font-size: 0.75rem;">Balance</div>
+                    <div style="font-size: 1.3rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="color: #9ca3af; font-size: 0.75rem;">Account Mode</div>
+                    <span id="mode-display" style="background: #374151; padding: 4px 8px; border-radius: 4px; color: #60a5fa; font-size: 0.75rem; font-weight: 700;">DEMO</span>
+                </div>
+            </div>
+            
+            <div class="hud-row">
+                 <button class="btn-secondary" onclick="switchMode()">Switch Mode</button>
+                 <button id="deposit-toggle-btn" class="btn-secondary hidden" onclick="toggleDepositPanel()">Add Real Funds</button>
+            </div>
+
+            <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981;">
+                <h4 style="margin: 0 0 8px 0; color: #10b981; font-size:0.9rem;">Deposit Real Money</h4>
+                <div style="display: flex; justify-content: center; gap: 5px;">
+                    <button class="btn-deposit" onclick="depositMoney(100)">₹100</button>
+                    <button class="btn-deposit" onclick="depositMoney(500)">₹500</button>
+                    <button class="btn-deposit" onclick="depositMoney(1000)">₹1,000</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0;">
+                <div class="bet-controls">
+                    <button class="bet-btn" onclick="placeBet(30)">₹30</button>
+                    <button class="bet-btn" onclick="placeBet(60)">₹60</button>
+                    <button class="bet-btn" onclick="placeBet(90)">₹90</button>
+                </div>
+                <p id="game-status" style="color:#f39c12;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isDemoMode = true;
+        let demoBalance = 10000;
+        let realBalance = 0;
+        let realProfitTracker = 0;
+        let playCount = 0;
+        let isGameRunning = false;
+
+        // REPLACE WITH YOUR ACTUAL UPI VPA
+        const MERCHANT_UPI_VPA = "yourname@ybl"; 
+
+        function handleAuth() {
+            const phone = document.getElementById('phone').value;
+            const pass = document.getElementById('password').value;
+            if(phone.length === 10 && pass.length > 0) {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('game-section').classList.remove('hidden');
+                initPixiGraphics();
+            } else {
+                alert("Please enter a valid 10-digit phone number and password.");
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('balance-display').innerText = isDemoMode ? demoBalance : realBalance;
+            const modeEl = document.getElementById('mode-display');
+            const depToggleBtn = document.getElementById('deposit-toggle-btn');
+            if (isDemoMode) {
+                modeEl.innerText = "DEMO";
+                modeEl.style.color = "#60a5fa";
+                depToggleBtn.classList.add('hidden');
+                document.getElementById('deposit-panel').classList.add('hidden');
+            } else {
+                modeEl.innerText = "REAL";
+                modeEl.style.color = "#10b981";
+                depToggleBtn.classList.remove('hidden');
+            }
+        }
+
+        function switchMode() {
+            if(isGameRunning) return;
+            isDemoMode = !isDemoMode;
+            updateUI();
+        }
+
+        function toggleDepositPanel() {
+            if(isGameRunning) return;
+            document.getElementById('deposit-panel').classList.toggle('hidden');
+        }
+
+        function depositMoney(amount) {
+            const upiUrl = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=${amount}.00&cu=INR&tr=TXN${Date.now()}&tn=WalletDeposit`;
+            window.location.href = upiUrl;
+        }
+
+        // --- PixiJS 2D Engine ---
+        let app, planeSprite, skyContainer, clouds = [];
+
+        function initPixiGraphics() {
+            const container = document.getElementById('game-canvas-container');
+            app = new PIXI.Application({
+                view: document.getElementById('pixi-canvas'),
+                width: container.clientWidth,
+                height: container.clientHeight,
+                backgroundColor: 0x020617,
+                resolution: window.devicePixelRatio || 1
+            });
+
+            skyContainer = new PIXI.Container();
+            app.stage.addChild(skyContainer);
+
+            // Background sky
+            const bg = new PIXI.Graphics();
+            bg.beginFill(0x0c4a6e);
+            bg.drawRect(0, 0, app.screen.width, app.screen.height);
+            bg.endFill();
+            skyContainer.addChild(bg);
+
+            // Airplane graphic
+            const planeGfx = new PIXI.Graphics();
+            planeGfx.beginFill(0xfcd34d);
+            planeGfx.moveTo(40, 15); planeGfx.lineTo(0, 0); planeGfx.lineTo(0, 30); planeGfx.lineTo(40, 15);
+            planeGfx.beginFill(0xef4444); planeGfx.drawRect(-5, 5, 10, 20);
+            planeGfx.endFill();
+            planeGfx.pivot.set(20, 15);
+
+            planeSprite = new PIXI.Container();
+            planeSprite.addChild(planeGfx);
+            skyContainer.addChild(planeSprite);
+            resetPlanePosition();
+        }
+
+        function resetPlanePosition() {
+            if(!planeSprite) return;
+            planeSprite.x = 60;
+            planeSprite.y = app.screen.height - 40;
+            planeSprite.rotation = -0.2;
+        }
+
+        function placeBet(betAmount) {
+            if(isGameRunning) return;
+            let activeBal = isDemoMode ? demoBalance : realBalance;
+            if(activeBal < betAmount) {
+                alert("Insufficient balance!");
+                return;
+            }
+
+            if(isDemoMode) demoBalance -= betAmount;
+            else realBalance -= betAmount;
+            updateUI();
+
+            isGameRunning = true;
+            resetPlanePosition();
+            let statusEl = document.getElementById('game-status');
+            let multiEl = document.getElementById('multiplier-overlay');
+            statusEl.innerText = "✈️ Taking off...";
+
+            let currentMultiplier = 1.0;
+            playCount++;
+            let forceCrashZero = false;
+
+            if(!isDemoMode && (playCount >= 6 || realProfitTracker >= 300)) {
+                forceCrashZero = true;
+                playCount = 0;
+                realProfitTracker = 0;
+            }
+
+            let gameInterval = setInterval(() => {
+                if(forceCrashZero) {
+                    currentMultiplier = (currentMultiplier - 0.15).toFixed(2);
+                    if(currentMultiplier <= 0.0) {
+                        currentMultiplier = 0.0;
+                        clearInterval(gameInterval);
+                        isGameRunning = false;
+                        statusEl.innerText = "💥 Crashed at 0.0X! Lost.";
+                        updateUI();
+                    }
+                } else {
+                    currentMultiplier = (parseFloat(currentMultiplier) + 0.1).toFixed(2);
+                    // Move plane up as multiplier increases
+                    if(planeSprite.y > 50) planeSprite.y -= 4;
+
+                    if(currentMultiplier >= 3.0 || (Math.random() < 0.12 && currentMultiplier > 1.2)) {
+                        clearInterval(gameInterval);
+                        isGameRunning = false;
+                        let payout = Math.floor(betAmount * currentMultiplier);
+                        if(isDemoMode) demoBalance += payout;
+                        else {
+                            realBalance += payout;
+                            realProfitTracker += (payout - betAmount);
+                        }
+                        statusEl.innerText = `✨ Won ₹${payout} at ${currentMultiplier}X!`;
+                        updateUI();
+                        return;
+                    }
+                }
+                multiEl.innerText = currentMultiplier + "X";
+            }, 250);
+        }
+    </script>
+</body>
+</html>
