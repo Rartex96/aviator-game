@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviator Sky Crash</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
     <style>
@@ -11,7 +11,7 @@
         * { box-sizing: border-box; }
         body { 
             font-family: 'Poppins', sans-serif; 
-            background: #0b0f19; 
+            background: #0f172a; 
             color: #fff; 
             text-align: center; 
             margin: 0; 
@@ -19,163 +19,153 @@
             width: 100vw;
             height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        /* Mobile-First Shell Container (Locks width to look like a real mobile app) */
-        #mobile-app-frame {
-            width: 100%;
-            max-width: 480px;
-            height: 100%;
-            max-height: 900px;
-            background: #0f172a;
-            display: flex;
             flex-direction: column;
-            position: relative;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
             overflow: hidden;
         }
 
         .hidden { display: none !important; }
 
-        /* Canvas Arena (Top half) */
+        /* Canvas Arena (Responsive height for both mobile & desktop) */
         #game-canvas-container {
             width: 100%;
-            height: 38vh;
+            height: 45vh;
             position: relative;
             background: #020617;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.7);
         }
+        @media (min-width: 768px) {
+            #game-canvas-container { height: 55vh; }
+        }
+
         #multiplier-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 4rem;
+            font-size: 4.5rem;
             font-weight: 800;
             color: #fff;
             pointer-events: none;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 25px rgba(255,215,0,0.5);
+            text-shadow: 0 5px 15px rgba(0,0,0,0.9), 0 0 30px rgba(255,215,0,0.6);
             z-index: 10;
         }
 
-        /* UI HUD Dashboard (Bottom half) */
+        /* UI HUD Dashboard */
         #ui-overlay {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 12px;
+            padding: 15px;
             background: #111827;
-            border-top: 2px solid #1f2937;
+            border-top: 2px solid #374151;
             overflow-y: auto;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
         }
 
-        .card { background: #1f2937; padding: 10px; border-radius: 10px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-        .hud-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .card { background: #1f2937; padding: 12px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .hud-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 
         button { 
-            padding: 10px 14px; 
+            padding: 12px 16px; 
             border-radius: 8px; 
             border: none; 
             font-weight: 800; 
             cursor: pointer; 
             font-family: 'Poppins', sans-serif; 
             text-transform: uppercase;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
         }
         button:active { transform: scale(0.96); }
 
-        .btn-primary { background: #f59e0b; color: #111; width: 100%; font-size: 0.95rem; padding: 12px; }
+        .btn-primary { background: #f59e0b; color: #111; width: 100%; font-size: 1rem; padding: 14px; }
         .btn-secondary { background: #4f46e5; color: #fff; }
         .btn-deposit { background: #10b981; color: #fff; width: 30%; }
         .btn-withdraw { background: #ef4444; color: #fff; width: 100%; margin-top: 5px; }
         
-        .bet-controls { display: flex; justify-content: center; gap: 6px; }
-        .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 1rem; padding: 12px 0; }
+        .bet-controls { display: flex; justify-content: center; gap: 8px; }
+        .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 1.1rem; padding: 14px 0; }
 
-        /* Auth Screen Tabs & Inputs */
-        #auth-section { margin: auto; background: #1f2937; padding: 25px; border-radius: 16px; width: 90%; max-width: 340px; border: 1px solid #374151; }
-        .auth-tabs { display: flex; margin-bottom: 15px; background: #111827; border-radius: 8px; padding: 4px; }
-        .auth-tab { flex: 1; background: transparent; color: #9ca3af; padding: 8px; border-radius: 6px; }
+        /* Auth Screen */
+        #auth-section { margin: auto; background: #1f2937; padding: 30px; border-radius: 16px; width: 90%; max-width: 380px; border: 1px solid #374151; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
+        .auth-tabs { display: flex; margin-bottom: 18px; background: #111827; border-radius: 8px; padding: 4px; }
+        .auth-tab { flex: 1; background: transparent; color: #9ca3af; padding: 10px; border-radius: 6px; }
         .auth-tab.active { background: #4f46e5; color: #fff; }
 
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.95rem; }
-        #game-status { font-weight: 600; min-height: 18px; margin-top: 8px; font-size: 0.8rem; }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 1rem; }
+        #game-status { font-weight: 600; min-height: 20px; margin-top: 10px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-    <div id="mobile-app-frame">
+    <!-- AUTH SECTION -->
+    <div id="auth-section">
+        <h2 style="margin-bottom: 8px; color: #f59e0b; font-size: 1.8rem;">✈️ Aviator Game</h2>
+        <p style="color:#9ca3af; font-size:0.85rem; margin-bottom: 20px;">Play & Fly High safely!</p>
+        
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
+            <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+        </div>
 
-        <!-- AUTH SECTION -->
-        <div id="auth-section">
-            <h2 style="margin-bottom: 5px; color: #f59e0b; font-size: 1.5rem;">✈️ Aviator Game</h2>
-            <p style="color:#9ca3af; font-size:0.8rem; margin-bottom: 15px;">Play & Fly High safely!</p>
+        <input type="tel" id="phone" placeholder="Phone Number (10 digits)" maxlength="10">
+        <input type="password" id="password" placeholder="Account Password">
+        <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Login to Account</button>
+    </div>
+
+    <!-- MAIN GAME DASHBOARD -->
+    <div id="game-section" class="hidden" style="display:flex; flex-direction:column; width:100%; height:100%;">
+        <div id="game-canvas-container">
+            <div id="multiplier-overlay">1.00X</div>
+            <canvas id="pixi-canvas"></canvas>
+        </div>
+
+        <div id="ui-overlay">
+            <div class="hud-row card">
+                <div style="text-align: left;">
+                    <div style="color: #9ca3af; font-size: 0.75rem;">Wallet Balance</div>
+                    <div style="font-size: 1.3rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="color: #9ca3af; font-size: 0.75rem;">Mode</div>
+                    <span id="mode-display" style="background: #374151; padding: 4px 8px; border-radius: 4px; color: #60a5fa; font-size: 0.75rem; font-weight: 700;">DEMO</span>
+                </div>
+            </div>
             
-            <div class="auth-tabs">
-                <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
-                <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+            <div class="hud-row">
+                 <button class="btn-secondary" onclick="switchMode()">Switch Mode</button>
+                 <button id="deposit-toggle-btn" class="btn-secondary hidden" onclick="togglePanel('deposit-panel')">Deposit Funds</button>
+                 <button id="withdraw-toggle-btn" class="btn-secondary hidden" onclick="togglePanel('withdraw-panel')">Withdraw</button>
             </div>
 
-            <input type="tel" id="phone" placeholder="Phone Number (10 digits)" maxlength="10">
-            <input type="password" id="password" placeholder="Account Password">
-            <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Login to Account</button>
-        </div>
-
-        <!-- MAIN GAME DASHBOARD -->
-        <div id="game-section" class="hidden" style="display:flex; flex-direction:column; height:100%;">
-            <div id="game-canvas-container">
-                <div id="multiplier-overlay">1.00X</div>
-                <canvas id="pixi-canvas"></canvas>
+            <!-- DEPOSIT PANEL (Real Mode) -->
+            <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981;">
+                <h4 style="margin: 0 0 8px 0; color: #10b981; font-size:0.85rem;">Deposit via PhonePe</h4>
+                <div style="display: flex; justify-content: center; gap: 6px;">
+                    <button class="btn-deposit" onclick="depositMoney(100)">₹100</button>
+                    <button class="btn-deposit" onclick="depositMoney(500)">₹500</button>
+                    <button class="btn-deposit" onclick="depositMoney(1000)">₹1,000</button>
+                </div>
             </div>
 
-            <div id="ui-overlay">
-                <div class="hud-row card">
-                    <div style="text-align: left;">
-                        <div style="color: #9ca3af; font-size: 0.7rem;">Wallet Balance</div>
-                        <div style="font-size: 1.2rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="color: #9ca3af; font-size: 0.7rem;">Mode</div>
-                        <span id="mode-display" style="background: #374151; padding: 3px 6px; border-radius: 4px; color: #60a5fa; font-size: 0.7rem; font-weight: 700;">DEMO</span>
-                    </div>
-                </div>
-                
-                <div class="hud-row">
-                     <button class="btn-secondary" onclick="switchMode()">Switch Mode</button>
-                     <button id="deposit-toggle-btn" class="btn-secondary hidden" onclick="togglePanel('deposit-panel')">Deposit Funds</button>
-                     <button id="withdraw-toggle-btn" class="btn-secondary hidden" onclick="togglePanel('withdraw-panel')">Withdraw</button>
-                </div>
+            <!-- WITHDRAW PANEL (Real Mode) -->
+            <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
+                <h4 style="margin: 0 0 8px 0; color: #ef4444; font-size:0.85rem;">Withdraw Funds (Min ₹500)</h4>
+                <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 500)" style="margin-bottom:8px; padding:10px; font-size:0.85rem;">
+                <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Withdrawal Request</button>
+            </div>
 
-                <!-- DEPOSIT PANEL (Real Mode) -->
-                <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981;">
-                    <h4 style="margin: 0 0 6px 0; color: #10b981; font-size:0.8rem;">Deposit via PhonePe</h4>
-                    <div style="display: flex; justify-content: center; gap: 5px;">
-                        <button class="btn-deposit" onclick="depositMoney(100)">₹100</button>
-                        <button class="btn-deposit" onclick="depositMoney(500)">₹500</button>
-                        <button class="btn-deposit" onclick="depositMoney(1000)">₹1,000</button>
-                    </div>
+            <div class="card" style="margin-bottom:0; margin-top:auto;">
+                <div class="bet-controls">
+                    <button class="bet-btn" onclick="placeBet(30)">₹30</button>
+                    <button class="bet-btn" onclick="placeBet(60)">₹60</button>
+                    <button class="bet-btn" onclick="placeBet(90)">₹90</button>
                 </div>
-
-                <!-- WITHDRAW PANEL (Real Mode) -->
-                <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
-                    <h4 style="margin: 0 0 6px 0; color: #ef4444; font-size:0.8rem;">Withdraw Funds (Min ₹500)</h4>
-                    <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 500)" style="margin-bottom:6px; padding:8px; font-size:0.8rem;">
-                    <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Withdrawal Request</button>
-                </div>
-
-                <div class="card" style="margin-bottom:0; margin-top:auto;">
-                    <div class="bet-controls">
-                        <button class="bet-btn" onclick="placeBet(30)">₹30</button>
-                        <button class="bet-btn" onclick="placeBet(60)">₹60</button>
-                        <button class="bet-btn" onclick="placeBet(90)">₹90</button>
-                    </div>
-                    <p id="game-status" style="color:#f39c12;"></p>
-                </div>
+                <p id="game-status" style="color:#f39c12;"></p>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -185,9 +175,9 @@
         let realProfitTracker = 0;
         let playCount = 0;
         let isGameRunning = false;
-        let authMode = 'login'; // 'login' or 'signup'
+        let authMode = 'login';
 
-        // Your exact requested PhonePe UPI ID
+        // Your requested PhonePe UPI ID
         const MERCHANT_UPI_VPA = "9685008188-4@ybl"; 
 
         function switchAuthTab(mode) {
@@ -289,7 +279,7 @@
             skyContainer.addChild(bg);
 
             // Generate Procedural Background Clouds
-            for(let i=0; i<4; i++) {
+            for(let i=0; i<5; i++) {
                 createCloud(Math.random() * app.screen.width, Math.random() * app.screen.height);
             }
 
@@ -334,8 +324,8 @@
 
         function resetPlanePosition() {
             if(!planeSprite) return;
-            planeSprite.x = 50;
-            planeSprite.y = app.screen.height - 40;
+            planeSprite.x = 60;
+            planeSprite.y = app.screen.height - 50;
             planeSprite.rotation = -0.15;
         }
 
