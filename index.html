@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviator Sky Crash</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+    <!-- Include QRCode.js library for reliable QR code generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap');
         
@@ -25,7 +27,6 @@
 
         .hidden { display: none !important; }
 
-        /* Canvas Arena (Responsive height for both mobile & desktop) */
         #game-canvas-container {
             width: 100%;
             height: 45vh;
@@ -50,7 +51,6 @@
             z-index: 10;
         }
 
-        /* UI HUD Dashboard */
         #ui-overlay {
             flex: 1;
             display: flex;
@@ -88,7 +88,6 @@
         .bet-controls { display: flex; justify-content: center; gap: 8px; }
         .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 1.1rem; padding: 14px 0; }
 
-        /* Auth Screen */
         #auth-section { margin: auto; background: #1f2937; padding: 30px; border-radius: 16px; width: 90%; max-width: 380px; border: 1px solid #374151; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
         .auth-tabs { display: flex; margin-bottom: 18px; background: #111827; border-radius: 8px; padding: 4px; }
         .auth-tab { flex: 1; background: transparent; color: #9ca3af; padding: 10px; border-radius: 6px; }
@@ -140,14 +139,15 @@
                  <button id="withdraw-toggle-btn" class="btn-secondary hidden" onclick="togglePanel('withdraw-panel')">Withdraw</button>
             </div>
 
-            <!-- DEPOSIT PANEL (Real Mode) -->
-            <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981;">
-                <h4 style="margin: 0 0 8px 0; color: #10b981; font-size:0.85rem;">Deposit via PhonePe</h4>
-                <div style="display: flex; justify-content: center; gap: 6px;">
-                    <button class="btn-deposit" onclick="depositMoney(100)">₹100</button>
-                    <button class="btn-deposit" onclick="depositMoney(500)">₹500</button>
-                    <button class="btn-deposit" onclick="depositMoney(1000)">₹1,000</button>
+            <!-- DEPOSIT PANEL (Real Mode) - QR Code & UPI Copy Safe Fix -->
+            <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
+                <h4 style="margin: 0 0 8px 0; color: #10b981; font-size:0.9rem;">Scan & Pay via PhonePe / GPay</h4>
+                <div id="qrcode-container" style="background: #fff; padding: 10px; display: inline-block; border-radius: 8px; margin-bottom: 8px;">
+                    <div id="qrcode"></div>
                 </div>
+                <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 6px;">UPI ID: <strong id="upi-text" style="color: #fff;">9685008188-4@ybl</strong></div>
+                <button class="btn-secondary" style="font-size: 0.75rem; padding: 8px 12px; margin-bottom: 8px;" onclick="copyUpiId()">Copy UPI ID</button>
+                <div style="font-size: 0.75rem; color: #f59e0b;">After paying, simulation balance updates automatically or contact support with UTR.</div>
             </div>
 
             <!-- WITHDRAW PANEL (Real Mode) -->
@@ -176,8 +176,8 @@
         let playCount = 0;
         let isGameRunning = false;
         let authMode = 'login';
+        let qrGenerated = false;
 
-        // Your requested PhonePe UPI ID
         const MERCHANT_UPI_VPA = "9685008188-4@ybl"; 
 
         function switchAuthTab(mode) {
@@ -232,11 +232,22 @@
             document.getElementById('deposit-panel').classList.add('hidden');
             document.getElementById('withdraw-panel').classList.add('hidden');
             document.getElementById(panelId).classList.toggle('hidden');
+
+            // Generate QR code safely when deposit panel opens
+            if(panelId === 'deposit-panel' && !qrGenerated) {
+                const upiString = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&cu=INR`;
+                new QRCode(document.getElementById("qrcode"), {
+                    text: upiString,
+                    width: 140,
+                    height: 140
+                });
+                qrGenerated = true;
+            }
         }
 
-        function depositMoney(amount) {
-            const upiUrl = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=${amount}.00&cu=INR&tr=TXN${Date.now()}&tn=WalletDeposit`;
-            window.location.href = upiUrl;
+        function copyUpiId() {
+            navigator.clipboard.writeText(MERCHANT_UPI_VPA);
+            alert("UPI ID copied to clipboard: " + MERCHANT_UPI_VPA);
         }
 
         function requestWithdrawal() {
@@ -271,34 +282,27 @@
             skyContainer = new PIXI.Container();
             app.stage.addChild(skyContainer);
 
-            // Sky Background
             const bg = new PIXI.Graphics();
             bg.beginFill(0x0c4a6e);
             bg.drawRect(0, 0, app.screen.width, app.screen.height);
             bg.endFill();
             skyContainer.addChild(bg);
 
-            // Generate Procedural Background Clouds
             for(let i=0; i<5; i++) {
                 createCloud(Math.random() * app.screen.width, Math.random() * app.screen.height);
             }
 
-            // Detailed Aeroplane Graphic Design
             const planeGfx = new PIXI.Graphics();
-            // Fuselage (Body)
             planeGfx.beginFill(0xfcd34d); 
             planeGfx.drawRoundedRect(-25, -8, 55, 16, 6);
             planeGfx.endFill();
-            // Wings
             planeGfx.beginFill(0xe0e7ff);
             planeGfx.moveTo(-5, -2); planeGfx.lineTo(10, -25); planeGfx.lineTo(20, -2);
             planeGfx.moveTo(-5, 2); planeGfx.lineTo(10, 25); planeGfx.lineTo(20, 2);
             planeGfx.endFill();
-            // Tail Fin
             planeGfx.beginFill(0xef4444);
             planeGfx.moveTo(-22, -8); planeGfx.lineTo(-32, -20); planeGfx.lineTo(-12, -8);
             planeGfx.endFill();
-            // Cockpit Window
             planeGfx.beginFill(0x38bdf8);
             planeGfx.drawEllipse(15, -3, 6, 4);
             planeGfx.endFill();
@@ -352,7 +356,6 @@
             playCount++;
             let forceCrashZero = false;
 
-            // Rigged house logic for Real Account (Wipes out on 6th play or profit past ₹300)
             if(!isDemoMode && (playCount >= 6 || realProfitTracker >= 300)) {
                 forceCrashZero = true;
                 playCount = 0;
@@ -360,7 +363,6 @@
             }
 
             let gameInterval = setInterval(() => {
-                // Move clouds to simulate movement
                 clouds.forEach(c => {
                     c.x -= 1.5;
                     if(c.x < -50) c.x = app.screen.width + 50;
@@ -383,7 +385,6 @@
                     currentMultiplier = (parseFloat(currentMultiplier) + 0.1).toFixed(2);
                     if(planeSprite.y > 40) planeSprite.y -= 3;
 
-                    // Random or capped crash logic (Demo mode can crash naturally too)
                     let crashChance = isDemoMode ? 0.10 : 0.12;
                     if(currentMultiplier >= 3.0 || (Math.random() < crashChance && currentMultiplier > 1.2)) {
                         clearInterval(gameInterval);
