@@ -35,7 +35,7 @@
 
         #game-canvas-container {
             width: 100%;
-            height: 42vh; /* Increased height so bottom elements don't get clipped on mobile */
+            height: 48vh; /* Expanded mobile canvas height to completely prevent clipping */
             position: relative;
             background: #020617;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
@@ -44,7 +44,7 @@
 
         #multiplier-overlay {
             position: absolute;
-            top: 40%; /* Shifted slightly higher so it sits neatly above the plane */
+            top: 35%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 1.8rem;
@@ -145,13 +145,13 @@
                     </div>
                 </div>
                 
-                <!-- REAL-MODE ONLY ACTION ROW (Deposit & Withdraw) -->
+                <!-- REAL-MODE ONLY ACTION ROW -->
                 <div id="real-actions-container" class="action-row hidden">
                      <button id="deposit-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('deposit-panel')">Deposit (₹100)</button>
                      <button id="withdraw-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
 
-                <!-- DEPOSIT PANEL (Scanner Only, No UPI ID text, Preset ₹100) -->
+                <!-- DEPOSIT PANEL -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
                     <h4 style="margin: 0 0 4px 0; color: #10b981; font-size:0.75rem;">Scan & Pay ₹100 via UPI</h4>
                     <div style="background:#fff; padding:4px; display:inline-block; border-radius:6px; margin: 2px 0;">
@@ -160,7 +160,7 @@
                     <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹100</button>
                 </div>
 
-                <!-- WITHDRAW PANEL (Real Mode Only) -->
+                <!-- WITHDRAW PANEL -->
                 <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
                     <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size:0.8rem;">Withdraw Funds (Min ₹100)</h4>
                     <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 100)">
@@ -302,17 +302,17 @@
                 createMiniAirplane(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Main gameplay aeroplane (Styled larger and positioned safely inside visible mobile bounds)
+            // Minimized Main Aeroplane (compact scale so it fits perfectly on small mobile viewports)
             const planeGfx = new PIXI.Graphics();
             planeGfx.beginFill(0xfcd34d); 
-            planeGfx.drawRoundedRect(-24, -8, 54, 16, 5);
+            planeGfx.drawRoundedRect(-16, -5, 36, 10, 3);
             planeGfx.endFill();
             planeGfx.beginFill(0xe0e7ff);
-            planeGfx.moveTo(-5, -3); planeGfx.lineTo(10, -24); planeGfx.lineTo(20, -3);
-            planeGfx.moveTo(-5, 3); planeGfx.lineTo(10, 24); planeGfx.lineTo(20, 3);
+            planeGfx.moveTo(-3, -2); planeGfx.lineTo(6, -16); planeGfx.lineTo(13, -2);
+            planeGfx.moveTo(-3, 2); planeGfx.lineTo(6, 16); planeGfx.lineTo(13, 2);
             planeGfx.endFill();
             planeGfx.beginFill(0xef4444);
-            planeGfx.moveTo(-22, -8); planeGfx.lineTo(-32, -18); planeGfx.lineTo(-12, -8);
+            planeGfx.moveTo(-14, -5); planeGfx.lineTo(-21, -12); planeGfx.lineTo(-8, -5);
             planeGfx.endFill();
 
             mainPlaneSprite = new PIXI.Container();
@@ -350,9 +350,9 @@
 
         function resetPlanePosition() {
             if(!mainPlaneSprite) return;
-            // Positioned right in the middle horizontally, and comfortably above the bottom border so it never clips on mobile
+            // Pinned securely right above the bottom border so it's fully visible on phones & PC
             mainPlaneSprite.x = app.screen.width / 2;
-            mainPlaneSprite.y = app.screen.height - 65;
+            mainPlaneSprite.y = app.screen.height - 35;
             mainPlaneSprite.rotation = -0.1;
         }
 
@@ -406,14 +406,14 @@
                     clearInterval(gameInterval);
                     isGameRunning = false;
                     
-                    mainPlaneSprite.y += 8;
+                    mainPlaneSprite.y += 6;
                     mainPlaneSprite.rotation = 0.4;
                     statusEl.style.color = "#ef4444";
                     statusEl.innerText = `💥 Crashed at ${targetCrashPoint}X! You lost ₹${betAmount}.`;
                     multiEl.innerText = targetCrashPoint + "X";
                     updateUI();
                 } else {
-                    if(mainPlaneSprite.y > 20) mainPlaneSprite.y -= 1.2;
+                    if(mainPlaneSprite.y > 20) mainPlaneSprite.y -= 1.0;
                     
                     if (currentMultiplier >= (targetCrashPoint - 0.4) && Math.random() < 0.4) {
                         clearInterval(gameInterval);
