@@ -44,10 +44,10 @@
 
         #multiplier-overlay {
             position: absolute;
-            top: 35%;
+            top: 45%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 800;
             color: #fff;
             pointer-events: none;
@@ -271,7 +271,7 @@
         }
 
         // --- PixiJS 2D Engine ---
-        let app, mainPlanes = [], skyContainer, tinyClouds = [], miniAirplanes = [];
+        let app, mainPlanes = [], skyContainer, tinyClouds = [];
         let initialPlanePositions = [];
 
         function initPixiGraphics() {
@@ -293,37 +293,32 @@
             bg.endFill();
             skyContainer.addChild(bg);
 
-            // Generate tiny clouds
-            for(let i=0; i<120; i++) {
+            // Generate calm background clouds
+            for(let i=0; i<30; i++) {
                 createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Generate tiny mini airplanes flying across the sky
-            for(let i=0; i<110; i++) {
-                createMiniAirplane(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
-            }
-
-            // Arrange 120+ main airplanes in a precise grid (vertical and horizontal lines)
+            // Create 60+ main airplanes arranged in precise horizontal and vertical lines (Grid: 10 columns x 6 rows = 60 airplanes)
             mainPlanes = [];
             initialPlanePositions = [];
             
-            const cols = 12; // 12 columns horizontally
-            const rows = 11; // 11 rows vertically (~132 total airplanes)
+            const cols = 10;
+            const rows = 6;
             const xStep = app.screen.width / (cols + 1);
             const yStep = app.screen.height / (rows + 1);
 
             for(let r = 1; r <= rows; r++) {
                 for(let c = 1; c <= cols; c++) {
                     const planeGfx = new PIXI.Graphics();
-                    planeGfx.beginFill(0xfcd34d); 
-                    planeGfx.drawRoundedRect(-14, -4, 30, 8, 2);
+                    planeGfx.beginFill(0xfcd34d); // Fuselage
+                    planeGfx.drawRoundedRect(-16, -5, 36, 11, 3);
                     planeGfx.endFill();
-                    planeGfx.beginFill(0xe0e7ff);
-                    planeGfx.moveTo(-2, -2); planeGfx.lineTo(5, -13); planeGfx.lineTo(11, -2);
-                    planeGfx.moveTo(-2, 2); planeGfx.lineTo(5, 13); planeGfx.lineTo(11, 2);
+                    planeGfx.beginFill(0xe0e7ff); // Wings
+                    planeGfx.moveTo(-2, -3); planeGfx.lineTo(7, -18); planeGfx.lineTo(15, -3);
+                    planeGfx.moveTo(-2, 3); planeGfx.lineTo(7, 18); planeGfx.lineTo(15, 3);
                     planeGfx.endFill();
-                    planeGfx.beginFill(0xef4444);
-                    planeGfx.moveTo(-12, -4); planeGfx.lineTo(-18, -10); planeGfx.lineTo(-6, -4);
+                    planeGfx.beginFill(0xef4444); // Tail wing
+                    planeGfx.moveTo(-14, -5); planeGfx.lineTo(-21, -12); planeGfx.lineTo(-7, -5);
                     planeGfx.endFill();
 
                     const planeSprite = new PIXI.Container();
@@ -334,7 +329,8 @@
                     
                     planeSprite.x = posX;
                     planeSprite.y = posY;
-                    planeSprite.rotation = -0.45; // Uniform upward angled pattern
+                    planeSprite.scale.set(0.9);
+                    planeSprite.rotation = -0.45; // Upward angle trajectory
 
                     skyContainer.addChild(planeSprite);
                     mainPlanes.push(planeSprite);
@@ -345,29 +341,15 @@
 
         function createTinyCloud(x, y) {
             const cloud = new PIXI.Graphics();
-            cloud.beginFill(0xffffff, 0.2);
+            cloud.beginFill(0xffffff, 0.25);
             cloud.drawCircle(0, 0, 4);
-            cloud.drawCircle(5, -3, 6);
-            cloud.drawCircle(10, 0, 4);
+            cloud.drawCircle(6, -3, 7);
+            cloud.drawCircle(12, 0, 4);
             cloud.endFill();
             cloud.x = x;
             cloud.y = y;
             skyContainer.addChild(cloud);
             tinyClouds.push(cloud);
-        }
-
-        function createMiniAirplane(x, y) {
-            const mini = new PIXI.Graphics();
-            mini.beginFill(0x38bdf8, 0.5);
-            mini.drawRoundedRect(-6, -2, 14, 4, 1);
-            mini.endFill();
-            mini.beginFill(0xe2e8f0, 0.6);
-            mini.moveTo(-1, -1); mini.lineTo(2, -8); mini.lineTo(5, -1);
-            mini.endFill();
-            mini.x = x;
-            mini.y = y;
-            skyContainer.addChild(mini);
-            miniAirplanes.push(mini);
         }
 
         function resetPlanePositions() {
@@ -408,19 +390,9 @@
             }
 
             let gameInterval = setInterval(() => {
-                // Animate tiny clouds
                 tinyClouds.forEach(c => {
-                    c.x -= 2.5;
-                    if(c.x < -20) c.x = app.screen.width + 20;
-                });
-
-                // Animate mini airplanes fleet
-                miniAirplanes.forEach(m => {
-                    m.x -= 3.0;
-                    if(m.x < -30) {
-                        m.x = app.screen.width + 30;
-                        m.y = Math.random() * app.screen.height;
-                    }
+                    c.x -= 3;
+                    if(c.x < -30) c.x = app.screen.width + 30;
                 });
 
                 currentMultiplier = (parseFloat(currentMultiplier) + 0.08).toFixed(2);
@@ -429,17 +401,21 @@
                     clearInterval(gameInterval);
                     isGameRunning = false;
                     
+                    // Crash animation
                     mainPlanes.forEach(plane => {
-                        plane.y += 4;
-                        plane.rotation = 0.3;
+                        plane.y += 15;
+                        plane.rotation = 0.4;
                     });
+                    
                     statusEl.style.color = "#ef4444";
                     statusEl.innerText = `💥 Crashed at ${targetCrashPoint}X! You lost ₹${betAmount}.`;
                     multiEl.innerText = targetCrashPoint + "X";
                     updateUI();
                 } else {
+                    // Smooth flight climb upwards across the canvas
                     mainPlanes.forEach(plane => {
-                        plane.y -= 0.3; // Grid flies upwards together during gameplay
+                        plane.y -= 0.5;
+                        plane.x += 0.3;
                     });
                     
                     if (currentMultiplier >= (targetCrashPoint - 0.4) && Math.random() < 0.4) {
