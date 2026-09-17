@@ -35,7 +35,7 @@
 
         #game-canvas-container {
             width: 100%;
-            height: 48vh; /* Expanded mobile canvas height to completely prevent clipping */
+            height: 48vh; 
             position: relative;
             background: #020617;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
@@ -246,7 +246,7 @@
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiDeepLink)}`;
                 document.getElementById('qr-code-img').src = qrUrl;
             } else if(panelId === 'withdraw-panel' && isWdHidden) {
-                document.getElementById('withdraw-panel').classList.remove('hidden');
+                document.getElementById('withdraw-panel').classList.add('hidden');
             }
         }
 
@@ -271,7 +271,8 @@
         }
 
         // --- PixiJS 2D Engine ---
-        let app, mainPlaneSprite, skyContainer, tinyClouds = [], miniAirplanes = [];
+        let app, mainPlanes = [], skyContainer, tinyClouds = [], miniAirplanes = [];
+        let initialPlanePositions = [];
 
         function initPixiGraphics() {
             const container = document.getElementById('game-canvas-container');
@@ -302,23 +303,38 @@
                 createMiniAirplane(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Minimized Main Aeroplane (compact scale so it fits perfectly on small mobile viewports)
-            const planeGfx = new PIXI.Graphics();
-            planeGfx.beginFill(0xfcd34d); 
-            planeGfx.drawRoundedRect(-16, -5, 36, 10, 3);
-            planeGfx.endFill();
-            planeGfx.beginFill(0xe0e7ff);
-            planeGfx.moveTo(-3, -2); planeGfx.lineTo(6, -16); planeGfx.lineTo(13, -2);
-            planeGfx.moveTo(-3, 2); planeGfx.lineTo(6, 16); planeGfx.lineTo(13, 2);
-            planeGfx.endFill();
-            planeGfx.beginFill(0xef4444);
-            planeGfx.moveTo(-14, -5); planeGfx.lineTo(-21, -12); planeGfx.lineTo(-8, -5);
-            planeGfx.endFill();
+            // Scatter 125 main airplanes randomly all over the entire panel
+            mainPlanes = [];
+            initialPlanePositions = [];
+            const totalPlanes = 125;
 
-            mainPlaneSprite = new PIXI.Container();
-            mainPlaneSprite.addChild(planeGfx);
-            skyContainer.addChild(mainPlaneSprite);
-            resetPlanePosition();
+            for(let i = 0; i < totalPlanes; i++) {
+                const planeGfx = new PIXI.Graphics();
+                planeGfx.beginFill(0xfcd34d); 
+                planeGfx.drawRoundedRect(-14, -4, 30, 8, 2);
+                planeGfx.endFill();
+                planeGfx.beginFill(0xe0e7ff);
+                planeGfx.moveTo(-2, -2); planeGfx.lineTo(5, -13); planeGfx.lineTo(11, -2);
+                planeGfx.moveTo(-2, 2); planeGfx.lineTo(5, 13); planeGfx.lineTo(11, 2);
+                planeGfx.endFill();
+                planeGfx.beginFill(0xef4444);
+                planeGfx.moveTo(-12, -4); planeGfx.lineTo(-18, -10); planeGfx.lineTo(-6, -4);
+                planeGfx.endFill();
+
+                const planeSprite = new PIXI.Container();
+                planeSprite.addChild(planeGfx);
+                
+                // Random position across the entire canvas width and height
+                const rx = Math.random() * app.screen.width;
+                const ry = Math.random() * app.screen.height;
+                planeSprite.x = rx;
+                planeSprite.y = ry;
+                planeSprite.rotation = -0.45; // Maintaining the upward angled pattern
+
+                skyContainer.addChild(planeSprite);
+                mainPlanes.push(planeSprite);
+                initialPlanePositions.push({ x: rx, y: ry });
+            }
         }
 
         function createTinyCloud(x, y) {
@@ -348,12 +364,13 @@
             miniAirplanes.push(mini);
         }
 
-        function resetPlanePosition() {
-            if(!mainPlaneSprite) return;
-            // Pinned securely right above the bottom border so it's fully visible on phones & PC
-            mainPlaneSprite.x = app.screen.width / 2;
-            mainPlaneSprite.y = app.screen.height - 35;
-            mainPlaneSprite.rotation = -0.1;
+        function resetPlanePositions() {
+            if(!mainPlanes || mainPlanes.length === 0) return;
+            mainPlanes.forEach((plane, i) => {
+                plane.x = initialPlanePositions[i].x;
+                plane.y = initialPlanePositions[i].y;
+                plane.rotation = -0.45;
+            });
         }
 
         function placeBet(betAmount) {
@@ -369,7 +386,7 @@
             updateUI();
 
             isGameRunning = true;
-            resetPlanePosition();
+            resetPlanePositions();
             let statusEl = document.getElementById('game-status');
             let multiEl = document.getElementById('multiplier-overlay');
             statusEl.style.color = "#f39c12";
@@ -406,14 +423,18 @@
                     clearInterval(gameInterval);
                     isGameRunning = false;
                     
-                    mainPlaneSprite.y += 6;
-                    mainPlaneSprite.rotation = 0.4;
+                    mainPlanes.forEach(plane => {
+                        plane.y += 4;
+                        plane.rotation = 0.3;
+                    });
                     statusEl.style.color = "#ef4444";
                     statusEl.innerText = `💥 Crashed at ${targetCrashPoint}X! You lost ₹${betAmount}.`;
                     multiEl.innerText = targetCrashPoint + "X";
                     updateUI();
                 } else {
-                    if(mainPlaneSprite.y > 20) mainPlaneSprite.y -= 1.0;
+                    mainPlanes.forEach(plane => {
+                        plane.y -= 0.3; // All scattered planes fly upwards together during gameplay
+                    });
                     
                     if (currentMultiplier >= (targetCrashPoint - 0.4) && Math.random() < 0.4) {
                         clearInterval(gameInterval);
