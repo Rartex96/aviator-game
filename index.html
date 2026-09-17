@@ -35,7 +35,7 @@
 
         #game-canvas-container {
             width: 100%;
-            height: 22vh;
+            height: 35vh;
             position: relative;
             background: #020617;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
@@ -47,7 +47,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: #fff;
             pointer-events: none;
@@ -59,7 +59,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 6px 10px;
+            padding: 8px 10px;
             background: #111827;
             border-top: 2px solid #374151;
             overflow-y: auto;
@@ -69,7 +69,7 @@
 
         .card { 
             background: #1f2937; 
-            padding: 6px 10px; 
+            padding: 8px 10px; 
             border-radius: 8px; 
             margin-bottom: 6px; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.3); 
@@ -89,22 +89,22 @@
         button:active { transform: scale(0.96); }
 
         .btn-primary { background: #f59e0b; color: #111; width: 100%; font-size: 1rem; padding: 12px; }
-        .btn-secondary { background: #4f46e5; color: #fff; font-size: 0.7rem; padding: 6px 10px; }
-        .btn-deposit-action { background: #10b981; color: #fff; width: 100%; font-size: 0.8rem; padding: 6px; margin-top: 2px; }
-        .btn-withdraw { background: #ef4444; color: #fff; width: 100%; font-size: 0.8rem; padding: 6px; margin-top: 2px; }
+        .btn-secondary { background: #4f46e5; color: #fff; font-size: 0.75rem; padding: 8px 10px; }
+        .btn-deposit-action { background: #10b981; color: #fff; width: 100%; font-size: 0.8rem; padding: 8px; margin-top: 4px; }
+        .btn-withdraw { background: #ef4444; color: #fff; width: 100%; font-size: 0.8rem; padding: 8px; margin-top: 4px; }
         
         .bet-controls { display: flex; justify-content: center; gap: 6px; }
-        .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 0.9rem; padding: 8px 0; border-radius: 8px; box-shadow: 0 3px 10px rgba(59, 130, 246, 0.4); }
+        .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 0.95rem; padding: 10px 0; border-radius: 8px; box-shadow: 0 3px 10px rgba(59, 130, 246, 0.4); }
 
         #auth-section { margin: auto; background: #1f2937; padding: 25px; border-radius: 16px; width: 90%; max-width: 380px; border: 1px solid #374151; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
         .auth-tabs { display: flex; margin-bottom: 15px; background: #111827; border-radius: 8px; padding: 4px; }
         .auth-tab { flex: 1; background: transparent; color: #9ca3af; padding: 10px; border-radius: 6px; font-size: 0.9rem; }
         .auth-tab.active { background: #4f46e5; color: #fff; }
 
-        input { width: 100%; padding: 6px; margin-bottom: 4px; border-radius: 6px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.8rem; }
-        #game-status { font-weight: 700; min-height: 14px; font-size: 0.75rem; margin: 4px 0 0 0; }
+        input { width: 100%; padding: 8px; margin-bottom: 6px; border-radius: 6px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.85rem; }
+        #game-status { font-weight: 700; min-height: 16px; font-size: 0.8rem; margin: 6px 0 0 0; }
         
-        .action-row { display: flex; gap: 6px; margin-bottom: 4px; }
+        .action-row { display: flex; gap: 6px; margin-bottom: 6px; }
     </style>
 </head>
 <body>
@@ -133,52 +133,39 @@
             </div>
 
             <div id="ui-overlay">
-                <!-- TOP HUD & SWITCH MODE ROW (Always Visible now) -->
-                <div class="hud-row card" style="padding: 6px 10px;">
+                <!-- TOP HUD & SWITCH MODE ROW -->
+                <div class="hud-row card">
                     <div style="text-align: left;">
-                        <div style="color: #9ca3af; font-size: 0.6rem;">Wallet Balance</div>
-                        <div style="font-size: 1rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
+                        <div style="color: #9ca3af; font-size: 0.65rem;">Wallet Balance</div>
+                        <div style="font-size: 1.1rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <span id="mode-display" style="background: #374151; padding: 2px 6px; border-radius: 4px; color: #60a5fa; font-size: 0.65rem; font-weight: 700;">DEMO</span>
+                        <span id="mode-display" style="background: #374151; padding: 3px 8px; border-radius: 4px; color: #60a5fa; font-size: 0.7rem; font-weight: 700;">DEMO</span>
                         <button class="btn-secondary" onclick="switchMode()">Switch Mode</button>
                     </div>
                 </div>
                 
                 <div class="action-row">
-                     <button id="deposit-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('deposit-panel')">Deposit (₹200)</button>
+                     <button id="deposit-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('deposit-panel')">Deposit (₹100)</button>
                      <button id="withdraw-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
 
-                <!-- DEPOSIT PANEL WITH QR SCANNER & UTR VERIFICATION -->
+                <!-- DEPOSIT PANEL (₹100 with Pay First Check) -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                    <h4 style="margin: 0 0 2px 0; color: #10b981; font-size:0.75rem;">Scan & Pay via QR Code (₹200)</h4>
-                    <p style="font-size:0.6rem; color:#9ca3af; margin:0 0 4px 0;">Scan with PhonePe, GPay, or Paytm:</p>
-                    
-                    <div style="background:#fff; padding:4px; display:inline-block; border-radius:6px; margin: 2px 0;">
-                        <img id="qr-code-img" alt="UPI QR" style="width:90px; height:90px; display:block;" />
-                    </div>
-
-                    <div style="font-size:0.65rem; color:#f59e0b; margin: 2px 0;">
-                        UPI ID: <b>9685008188-4@ybl</b>
-                    </div>
-
-                    <div style="margin: 4px 0;">
-                        <input type="text" id="utr-input" placeholder="Enter 12-digit UPI UTR No." maxlength="12" style="text-align: center; font-weight: 700; padding: 5px; font-size: 0.75rem;">
-                    </div>
-
-                    <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹200</button>
+                    <h4 style="margin: 0 0 4px 0; color: #10b981; font-size:0.8rem;">Add ₹100 via UPI</h4>
+                    <p style="font-size:0.65rem; color:#9ca3af; margin:0 0 6px 0;">Pay to UPI ID: <b>9685008188-4@ybl</b></p>
+                    <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹100</button>
                 </div>
 
-                <!-- WITHDRAW PANEL -->
+                <!-- WITHDRAW PANEL (Min ₹100) -->
                 <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
-                    <h4 style="margin: 0 0 2px 0; color: #ef4444; font-size:0.75rem;">Withdraw Funds (Min ₹500)</h4>
-                    <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 500)" style="margin-bottom:3px; padding:5px; font-size:0.75rem;">
+                    <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size:0.8rem;">Withdraw Funds (Min ₹100)</h4>
+                    <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 100)">
                     <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Request</button>
                 </div>
 
                 <!-- BET CONTROLS SECTION -->
-                <div class="card" style="margin-top: 4px; margin-bottom: 6px;">
+                <div class="card" style="margin-top: auto;">
                     <div class="bet-controls">
                         <button class="bet-btn" onclick="placeBet(30)">₹30</button>
                         <button class="bet-btn" onclick="placeBet(60)">₹60</button>
@@ -196,9 +183,6 @@
         let realBalance = 0;
         let isGameRunning = false;
         let authMode = 'login';
-
-        const MERCHANT_UPI_VPA = "9685008188-4@ybl"; 
-        let usedUtRs = new Set();
 
         function switchAuthTab(mode) {
             authMode = mode;
@@ -249,41 +233,28 @@
             
             if(panelId === 'deposit-panel' && isDepHidden) {
                 document.getElementById('deposit-panel').classList.remove('hidden');
-                const upiDeepLink = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=200&cu=INR`;
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiDeepLink)}`;
-                document.getElementById('qr-code-img').src = qrUrl;
             } else if(panelId === 'withdraw-panel' && isWdHidden) {
                 document.getElementById('withdraw-panel').classList.remove('hidden');
             }
         }
 
         function verifyAndCreditDeposit() {
-            const utr = document.getElementById('utr-input').value.trim();
-            
-            if (utr.length !== 12 || isNaN(utr)) {
-                alert("Please enter a valid 12-digit UPI Reference Number (UTR) from your payment app receipt.");
+            let confirmPay = confirm("Please pay ₹100 first via UPI, then only we will add hundred rupees! Did you complete the payment?");
+            if (!confirmPay) {
+                alert("First pay money, then only we will add hundred rupees!");
                 return;
             }
 
-            if (usedUtRs.has(utr)) {
-                alert("This transaction reference number has already been used!");
-                return;
-            }
-
-            usedUtRs.add(utr);
-            let fixedDepositAmt = 200;
-            realBalance += fixedDepositAmt;
+            realBalance += 100;
             updateUI();
-            
-            alert(`Payment of ₹${fixedDepositAmt} verified successfully! Added to your wallet balance.`);
-            document.getElementById('utr-input').value = '';
+            alert("Payment verified successfully! ₹100 added to your wallet.");
             togglePanel('');
         }
 
         function requestWithdrawal() {
             const amt = parseInt(document.getElementById('withdraw-amt').value);
-            if(isNaN(amt) || amt < 500) {
-                alert("Minimum withdrawal amount is ₹500!");
+            if(isNaN(amt) || amt < 100) {
+                alert("Minimum withdrawal amount is ₹100!");
                 return;
             }
             if(amt > realBalance) {
@@ -292,7 +263,7 @@
             }
             realBalance -= amt;
             updateUI();
-            alert("Your withdrawal request has been submitted successfully. It will be processed within 24 hours.");
+            alert("Your withdrawal request has been submitted successfully and will be processed soon.");
             togglePanel('');
         }
 
@@ -318,7 +289,7 @@
             bg.endFill();
             skyContainer.addChild(bg);
 
-            for(let i=0; i<3; i++) {
+            for(let i=0; i<4; i++) {
                 createCloud(Math.random() * app.screen.width, Math.random() * app.screen.height);
             }
 
@@ -343,9 +314,9 @@
         function createCloud(x, y) {
             const cloud = new PIXI.Graphics();
             cloud.beginFill(0xffffff, 0.25);
-            cloud.drawCircle(0, 0, 12);
-            cloud.drawCircle(10, -6, 16);
-            cloud.drawCircle(22, 0, 12);
+            cloud.drawCircle(0, 0, 14);
+            cloud.drawCircle(12, -8, 18);
+            cloud.drawCircle(24, 0, 14);
             cloud.endFill();
             cloud.x = x;
             cloud.y = y;
@@ -355,8 +326,8 @@
 
         function resetPlanePosition() {
             if(!planeSprite) return;
-            planeSprite.x = 40;
-            planeSprite.y = app.screen.height - 15;
+            planeSprite.x = 50;
+            planeSprite.y = app.screen.height - 20;
             planeSprite.rotation = -0.15;
         }
 
@@ -385,13 +356,13 @@
             if (randomRoll < 0.35) {
                 targetCrashPoint = parseFloat((1.01 + Math.random() * 0.25).toFixed(2));
             } else {
-                targetCrashPoint = parseFloat((1.35 + Math.random() * 2.2).toFixed(2));
+                targetCrashPoint = parseFloat((1.35 + Math.random() * 2.5).toFixed(2));
             }
 
             let gameInterval = setInterval(() => {
                 clouds.forEach(c => {
-                    c.x -= 1.5;
-                    if(c.x < -40) c.x = app.screen.width + 40;
+                    c.x -= 2;
+                    if(c.x < -50) c.x = app.screen.width + 50;
                 });
 
                 currentMultiplier = (parseFloat(currentMultiplier) + 0.08).toFixed(2);
@@ -400,14 +371,14 @@
                     clearInterval(gameInterval);
                     isGameRunning = false;
                     
-                    planeSprite.y += 6;
+                    planeSprite.y += 8;
                     planeSprite.rotation = 0.4;
                     statusEl.style.color = "#ef4444";
-                    statusEl.innerText = `💥 Crashed at -${targetCrashPoint}X! You lost ₹${betAmount}.`;
-                    multiEl.innerText = "-" + targetCrashPoint + "X";
+                    statusEl.innerText = `💥 Crashed at ${targetCrashPoint}X! You lost ₹${betAmount}.`;
+                    multiEl.innerText = targetCrashPoint + "X";
                     updateUI();
                 } else {
-                    if(planeSprite.y > 15) planeSprite.y -= 1;
+                    if(planeSprite.y > 20) planeSprite.y -= 1.2;
                     
                     if (currentMultiplier >= (targetCrashPoint - 0.4) && Math.random() < 0.4) {
                         clearInterval(gameInterval);
