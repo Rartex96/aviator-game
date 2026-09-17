@@ -2,32 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aviator Sky Crash</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap');
         
         * { box-sizing: border-box; }
-        body { 
+        html, body { 
             font-family: 'Poppins', sans-serif; 
             background: #0f172a; 
             color: #fff; 
             text-align: center; 
             margin: 0; 
             padding: 0; 
-            width: 100vw;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
+            position: fixed;
         }
 
         .hidden { display: none !important; }
 
+        #app-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            position: relative;
+        }
+
         #game-canvas-container {
             width: 100%;
-            height: 32vh;
+            height: 28vh;
             position: relative;
             background: #020617;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
@@ -39,7 +47,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: #fff;
             pointer-events: none;
@@ -51,15 +59,15 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 8px 10px;
+            padding: 8px 12px;
             background: #111827;
             border-top: 2px solid #374151;
             overflow-y: auto;
             width: 100%;
+            justify-content: space-between;
         }
 
-        .card { background: #1f2937; padding: 6px 10px; border-radius: 8px; margin-bottom: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .card { background: #1f2937; padding: 6px 10px; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
         .hud-row { display: flex; justify-content: space-between; align-items: center; }
 
         button { 
@@ -79,7 +87,7 @@
         .btn-withdraw { background: #ef4444; color: #fff; width: 100%; font-size: 0.85rem; padding: 8px; margin-top: 3px; }
         
         .bet-controls { display: flex; justify-content: center; gap: 6px; }
-        .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 3px 10px rgba(59, 130, 246, 0.4); }
+        .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 0.95rem; padding: 8px 0; border-radius: 8px; box-shadow: 0 3px 10px rgba(59, 130, 246, 0.4); }
 
         #auth-section { margin: auto; background: #1f2937; padding: 25px; border-radius: 16px; width: 90%; max-width: 380px; border: 1px solid #374151; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
         .auth-tabs { display: flex; margin-bottom: 15px; background: #111827; border-radius: 8px; padding: 4px; }
@@ -87,91 +95,90 @@
         .auth-tab.active { background: #4f46e5; color: #fff; }
 
         input { width: 100%; padding: 8px; margin-bottom: 4px; border-radius: 6px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.85rem; }
-        #game-status { font-weight: 700; min-height: 18px; font-size: 0.85rem; margin: 4px 0 0 0; }
+        #game-status { font-weight: 700; min-height: 16px; font-size: 0.8rem; margin: 3px 0 0 0; }
         
         .action-row { display: flex; gap: 6px; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-    <!-- AUTH SECTION -->
-    <div id="auth-section">
-        <h2 style="margin-bottom: 6px; color: #f59e0b; font-size: 1.6rem;">✈️ Aviator Game</h2>
-        <p style="color:#9ca3af; font-size:0.85rem; margin-bottom: 15px;">Play & Fly High safely!</p>
-        
-        <div class="auth-tabs">
-            <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
-            <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+    <div id="app-wrapper">
+        <!-- AUTH SECTION -->
+        <div id="auth-section">
+            <h2 style="margin-bottom: 6px; color: #f59e0b; font-size: 1.6rem;">✈️ Aviator Game</h2>
+            <p style="color:#9ca3af; font-size:0.85rem; margin-bottom: 15px;">Play & Fly High safely!</p>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+            </div>
+
+            <input type="tel" id="phone" placeholder="Phone Number (10 digits)" maxlength="10">
+            <input type="password" id="password" placeholder="Account Password">
+            <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Login to Account</button>
         </div>
 
-        <input type="tel" id="phone" placeholder="Phone Number (10 digits)" maxlength="10">
-        <input type="password" id="password" placeholder="Account Password">
-        <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Login to Account</button>
-    </div>
+        <!-- MAIN GAME DASHBOARD -->
+        <div id="game-section" class="hidden" style="display:flex; flex-direction:column; width:100%; height:100%;">
+            <div id="game-canvas-container">
+                <div id="multiplier-overlay">1.00X</div>
+                <canvas id="pixi-canvas"></canvas>
+            </div>
 
-    <!-- MAIN GAME DASHBOARD -->
-    <div id="game-section" class="hidden" style="display:flex; flex-direction:column; width:100%; height:100%;">
-        <div id="game-canvas-container">
-            <div id="multiplier-overlay">1.00X</div>
-            <canvas id="pixi-canvas"></canvas>
-        </div>
-
-        <div id="ui-overlay">
-            <!-- TOP SECTION: WALLET & MODES -->
-            <div>
-                <div class="hud-row card" style="padding: 6px 10px;">
+            <div id="ui-overlay">
+                <!-- TOP HUD & SWITCH MODE ROW -->
+                <div class="hud-row card" style="padding: 5px 8px;">
                     <div style="text-align: left;">
-                        <div style="color: #9ca3af; font-size: 0.65rem;">Wallet Balance</div>
-                        <div style="font-size: 1.1rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
+                        <div style="color: #9ca3af; font-size: 0.6rem;">Wallet Balance</div>
+                        <div style="font-size: 1rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <span id="mode-display" style="background: #374151; padding: 3px 6px; border-radius: 4px; color: #60a5fa; font-size: 0.7rem; font-weight: 700;">DEMO</span>
-                        <button class="btn-secondary" style="font-size: 0.7rem; padding: 5px 8px;" onclick="switchMode()">Switch Mode</button>
+                        <span id="mode-display" style="background: #374151; padding: 2px 5px; border-radius: 4px; color: #60a5fa; font-size: 0.65rem; font-weight: 700;">DEMO</span>
+                        <button class="btn-secondary" style="font-size: 0.65rem; padding: 4px 6px;" onclick="switchMode()">Switch Mode</button>
                     </div>
                 </div>
                 
                 <div class="action-row">
-                     <button id="deposit-toggle-btn" class="btn-secondary hidden" style="flex:1; padding: 6px;" onclick="togglePanel('deposit-panel')">Deposit (₹100 Fixed)</button>
-                     <button id="withdraw-toggle-btn" class="btn-secondary hidden" style="flex:1; padding: 6px;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
+                     <button id="deposit-toggle-btn" class="btn-secondary hidden" style="flex:1; padding: 5px;" onclick="togglePanel('deposit-panel')">Deposit (₹200 min)</button>
+                     <button id="withdraw-toggle-btn" class="btn-secondary hidden" style="flex:1; padding: 5px;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
 
-                <!-- DEPOSIT PANEL -->
+                <!-- DEPOSIT PANEL WITH QR SCANNER & UTR VERIFICATION -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                    <h4 style="margin: 0 0 2px 0; color: #10b981; font-size:0.75rem;">Instant UPI Deposit (Exact ₹100)</h4>
-                    <p style="font-size:0.6rem; color:#9ca3af; margin:0 0 4px 0;">Scan QR or pay via PhonePe:</p>
+                    <h4 style="margin: 0 0 2px 0; color: #10b981; font-size:0.75rem;">Scan & Pay via QR Code (₹200)</h4>
+                    <p style="font-size:0.6rem; color:#9ca3af; margin:0 0 4px 0;">Scan with PhonePe, GPay, or Paytm:</p>
                     
-                    <div style="background:#fff; padding:3px; display:inline-block; border-radius:4px; margin: 2px 0;">
-                        <img id="qr-code-img" src="" alt="UPI QR" style="width:80px; height:80px; display:block;" />
-                    </div>
-                    <div style="font-size:0.65rem; background:#111827; padding:4px; border-radius:4px; margin-bottom:3px; display: flex; justify-content: space-between; align-items: center;">
-                        <span id="vpa-text" style="color:#f59e0b; font-weight:700;">9685008188-4@ybl</span>
-                        <button onclick="copyUpiId()" style="background: #374151; color: #fff; padding: 2px 6px; font-size: 0.6rem;">Copy</button>
+                    <div style="background:#fff; padding:4px; display:inline-block; border-radius:6px; margin: 2px 0;">
+                        <img id="qr-code-img" alt="UPI QR" style="width:90px; height:90px; display:block;" />
                     </div>
 
-                    <button onclick="triggerUpiPayment()" style="background: #2563eb; color: #fff; width: 100%; font-size: 0.75rem; padding: 6px; border-radius: 6px; margin-bottom: 4px;">
-                        🚀 Pay ₹100 Using PhonePe / UPI App
-                    </button>
+                    <div style="font-size:0.65rem; color:#f59e0b; margin: 2px 0;">
+                        UPI ID: <b>9685008188-4@ybl</b>
+                    </div>
 
-                    <input type="text" id="upi-utr" placeholder="Enter 12-digit UTR / Ref ID" style="font-size: 0.75rem; text-align: center; margin-bottom: 4px;">
-                    <button class="btn-deposit-action" onclick="confirmDeposit()">I Have Successfully Paid ₹100</button>
+                    <div style="margin: 4px 0;">
+                        <input type="text" id="utr-input" placeholder="Enter 12-digit UPI Ref / UTR No." maxlength="12" style="text-align: center; font-weight: 700; padding: 5px; font-size: 0.75rem;">
+                    </div>
+
+                    <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹200</button>
                 </div>
 
                 <!-- WITHDRAW PANEL -->
                 <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
-                    <h4 style="margin: 0 0 2px 0; color: #ef4444; font-size:0.75rem;">Withdraw Funds (No Limit)</h4>
-                    <input type="number" id="withdraw-amt" placeholder="Enter amount to withdraw" style="margin-bottom:3px; padding:5px; font-size:0.75rem;">
+                    <h4 style="margin: 0 0 2px 0; color: #ef4444; font-size:0.75rem;">Withdraw Funds (Min ₹500)</h4>
+                    <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 500)" style="margin-bottom:3px; padding:5px; font-size:0.75rem;">
                     <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Request</button>
                 </div>
-            </div>
 
-            <!-- BOTTOM SECTION: BET CONTROLS -->
-            <div class="card" style="margin-bottom: 2px;">
-                <div class="bet-controls">
-                    <button class="bet-btn" onclick="placeBet(30)">₹30</button>
-                    <button class="bet-btn" onclick="placeBet(60)">₹60</button>
-                    <button class="bet-btn" onclick="placeBet(90)">₹90</button>
+                <!-- BET CONTROLS SECTION -->
+                <div class="card" style="margin-top: auto; margin-bottom: 2px;">
+                    <div class="bet-controls">
+                        <button class="bet-btn" onclick="placeBet(30)">₹30</button>
+                        <button class="bet-btn" onclick="placeBet(60)">₹60</button>
+                        <button class="bet-btn" onclick="placeBet(90)">₹90</button>
+                    </div>
+                    <p id="game-status" style="color:#f39c12;"></p>
                 </div>
-                <p id="game-status" style="color:#f39c12;"></p>
             </div>
         </div>
     </div>
@@ -184,6 +191,7 @@
         let authMode = 'login';
 
         const MERCHANT_UPI_VPA = "9685008188-4@ybl"; 
+        let usedUtRs = new Set();
 
         function switchAuthTab(mode) {
             authMode = mode;
@@ -242,7 +250,7 @@
             
             if(panelId === 'deposit-panel' && isDepHidden) {
                 document.getElementById('deposit-panel').classList.remove('hidden');
-                const upiDeepLink = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=100&cu=INR`;
+                const upiDeepLink = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=200&cu=INR`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiDeepLink)}`;
                 document.getElementById('qr-code-img').src = qrUrl;
             } else if(panelId === 'withdraw-panel' && isWdHidden) {
@@ -250,34 +258,33 @@
             }
         }
 
-        function triggerUpiPayment() {
-            const upiUrl = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=100&cu=INR`;
-            window.location.href = upiUrl;
-        }
-
-        function copyUpiId() {
-            navigator.clipboard.writeText(MERCHANT_UPI_VPA).then(() => {
-                alert("UPI ID copied to clipboard!");
-            });
-        }
-
-        function confirmDeposit() {
-            const utrField = document.getElementById('upi-utr').value.trim();
-            if(utrField.length < 8) {
-                alert("Payment verification failed! Please complete payment and enter a valid UTR ID.");
+        function verifyAndCreditDeposit() {
+            const utr = document.getElementById('utr-input').value.trim();
+            
+            if (utr.length !== 12 || isNaN(utr)) {
+                alert("Please enter a valid 12-digit UPI Reference Number (UTR) from your payment app receipt.");
                 return;
             }
-            realBalance += 100;
+
+            if (usedUtRs.has(utr)) {
+                alert("This transaction reference number has already been used!");
+                return;
+            }
+
+            usedUtRs.add(utr);
+            let fixedDepositAmt = 200;
+            realBalance += fixedDepositAmt;
             updateUI();
-            alert(`Payment of ₹100 verified! Added to real balance.`);
-            document.getElementById('upi-utr').value = "";
+            
+            alert(`Payment of ₹${fixedDepositAmt} verified successfully! Added to your wallet balance.`);
+            document.getElementById('utr-input').value = '';
             togglePanel('');
         }
 
         function requestWithdrawal() {
             const amt = parseInt(document.getElementById('withdraw-amt').value);
-            if(isNaN(amt) || amt <= 0) {
-                alert("Please enter a valid withdrawal amount!");
+            if(isNaN(amt) || amt < 500) {
+                alert("Minimum withdrawal amount is ₹500!");
                 return;
             }
             if(amt > realBalance) {
@@ -286,8 +293,7 @@
             }
             realBalance -= amt;
             updateUI();
-            alert(`Withdrawal request of ₹${amt} submitted successfully.`);
-            document.getElementById('withdraw-amt').value = "";
+            alert("Your withdrawal request has been submitted successfully. It will be processed within 24 hours.");
             togglePanel('');
         }
 
@@ -376,7 +382,12 @@
 
             let currentMultiplier = 1.0;
             let randomRoll = Math.random();
-            let targetCrashPoint = randomRoll < 0.35 ? parseFloat((1.01 + Math.random() * 0.25).toFixed(2)) : parseFloat((1.35 + Math.random() * 2.2).toFixed(2));
+            let targetCrashPoint;
+            if (randomRoll < 0.35) {
+                targetCrashPoint = parseFloat((1.01 + Math.random() * 0.25).toFixed(2));
+            } else {
+                targetCrashPoint = parseFloat((1.35 + Math.random() * 2.2).toFixed(2));
+            }
 
             let gameInterval = setInterval(() => {
                 clouds.forEach(c => {
@@ -389,10 +400,11 @@
                 if (currentMultiplier >= targetCrashPoint) {
                     clearInterval(gameInterval);
                     isGameRunning = false;
+                    
                     planeSprite.y += 6;
                     planeSprite.rotation = 0.4;
                     statusEl.style.color = "#ef4444";
-                    statusEl.innerText = `💥 Crashed at -${targetCrashPoint}X! Lost ₹${betAmount}.`;
+                    statusEl.innerText = `💥 Crashed at -${targetCrashPoint}X! You lost ₹${betAmount}.`;
                     multiEl.innerText = "-" + targetCrashPoint + "X";
                     updateUI();
                 } else {
@@ -402,6 +414,7 @@
                         clearInterval(gameInterval);
                         isGameRunning = false;
                         let payout = Math.floor(betAmount * currentMultiplier);
+                        
                         if(isDemoMode) demoBalance += payout;
                         else realBalance += payout;
 
