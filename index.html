@@ -303,37 +303,43 @@
                 createMiniAirplane(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Scatter 125 main airplanes randomly all over the entire panel
+            // Arrange 120+ main airplanes in a precise grid (vertical and horizontal lines)
             mainPlanes = [];
             initialPlanePositions = [];
-            const totalPlanes = 125;
+            
+            const cols = 12; // 12 columns horizontally
+            const rows = 11; // 11 rows vertically (~132 total airplanes)
+            const xStep = app.screen.width / (cols + 1);
+            const yStep = app.screen.height / (rows + 1);
 
-            for(let i = 0; i < totalPlanes; i++) {
-                const planeGfx = new PIXI.Graphics();
-                planeGfx.beginFill(0xfcd34d); 
-                planeGfx.drawRoundedRect(-14, -4, 30, 8, 2);
-                planeGfx.endFill();
-                planeGfx.beginFill(0xe0e7ff);
-                planeGfx.moveTo(-2, -2); planeGfx.lineTo(5, -13); planeGfx.lineTo(11, -2);
-                planeGfx.moveTo(-2, 2); planeGfx.lineTo(5, 13); planeGfx.lineTo(11, 2);
-                planeGfx.endFill();
-                planeGfx.beginFill(0xef4444);
-                planeGfx.moveTo(-12, -4); planeGfx.lineTo(-18, -10); planeGfx.lineTo(-6, -4);
-                planeGfx.endFill();
+            for(let r = 1; r <= rows; r++) {
+                for(let c = 1; c <= cols; c++) {
+                    const planeGfx = new PIXI.Graphics();
+                    planeGfx.beginFill(0xfcd34d); 
+                    planeGfx.drawRoundedRect(-14, -4, 30, 8, 2);
+                    planeGfx.endFill();
+                    planeGfx.beginFill(0xe0e7ff);
+                    planeGfx.moveTo(-2, -2); planeGfx.lineTo(5, -13); planeGfx.lineTo(11, -2);
+                    planeGfx.moveTo(-2, 2); planeGfx.lineTo(5, 13); planeGfx.lineTo(11, 2);
+                    planeGfx.endFill();
+                    planeGfx.beginFill(0xef4444);
+                    planeGfx.moveTo(-12, -4); planeGfx.lineTo(-18, -10); planeGfx.lineTo(-6, -4);
+                    planeGfx.endFill();
 
-                const planeSprite = new PIXI.Container();
-                planeSprite.addChild(planeGfx);
-                
-                // Random position across the entire canvas width and height
-                const rx = Math.random() * app.screen.width;
-                const ry = Math.random() * app.screen.height;
-                planeSprite.x = rx;
-                planeSprite.y = ry;
-                planeSprite.rotation = -0.45; // Maintaining the upward angled pattern
+                    const planeSprite = new PIXI.Container();
+                    planeSprite.addChild(planeGfx);
+                    
+                    const posX = c * xStep;
+                    const posY = r * yStep;
+                    
+                    planeSprite.x = posX;
+                    planeSprite.y = posY;
+                    planeSprite.rotation = -0.45; // Uniform upward angled pattern
 
-                skyContainer.addChild(planeSprite);
-                mainPlanes.push(planeSprite);
-                initialPlanePositions.push({ x: rx, y: ry });
+                    skyContainer.addChild(planeSprite);
+                    mainPlanes.push(planeSprite);
+                    initialPlanePositions.push({ x: posX, y: posY });
+                }
             }
         }
 
@@ -433,7 +439,7 @@
                     updateUI();
                 } else {
                     mainPlanes.forEach(plane => {
-                        plane.y -= 0.3; // All scattered planes fly upwards together during gameplay
+                        plane.y -= 0.3; // Grid flies upwards together during gameplay
                     });
                     
                     if (currentMultiplier >= (targetCrashPoint - 0.4) && Math.random() < 0.4) {
