@@ -145,28 +145,22 @@
                     </div>
                 </div>
                 
-                <div class="action-row">
+                <!-- REAL-MODE ONLY ACTION ROW (Deposit & Withdraw) -->
+                <div id="real-actions-container" class="action-row hidden">
                      <button id="deposit-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('deposit-panel')">Deposit (₹100)</button>
                      <button id="withdraw-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
 
-                <!-- DEPOSIT PANEL WITH RESTORED SCANNER & STRICT ERROR LOGIC -->
+                <!-- DEPOSIT PANEL (Scanner Only, No UPI ID text, Preset ₹100) -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                    <h4 style="margin: 0 0 2px 0; color: #10b981; font-size:0.75rem;">Scan & Pay ₹100 via UPI</h4>
-                    <p style="font-size:0.6rem; color:#9ca3af; margin:0 0 4px 0;">Scan QR or use UPI ID:</p>
-                    
+                    <h4 style="margin: 0 0 4px 0; color: #10b981; font-size:0.75rem;">Scan & Pay ₹100 via UPI</h4>
                     <div style="background:#fff; padding:4px; display:inline-block; border-radius:6px; margin: 2px 0;">
                         <img id="qr-code-img" alt="UPI QR" style="width:90px; height:90px; display:block;" />
                     </div>
-
-                    <div style="font-size:0.65rem; color:#f59e0b; margin: 2px 0;">
-                        UPI ID: <b>9685008188-4@ybl</b>
-                    </div>
-
                     <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹100</button>
                 </div>
 
-                <!-- WITHDRAW PANEL (Min ₹100) -->
+                <!-- WITHDRAW PANEL (Real Mode Only) -->
                 <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
                     <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size:0.8rem;">Withdraw Funds (Min ₹100)</h4>
                     <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 100)">
@@ -217,13 +211,18 @@
         function updateUI() {
             document.getElementById('balance-display').innerText = isDemoMode ? demoBalance : realBalance;
             const modeEl = document.getElementById('mode-display');
+            const realActionsEl = document.getElementById('real-actions-container');
 
             if (isDemoMode) {
                 modeEl.innerText = "DEMO";
                 modeEl.style.color = "#60a5fa";
+                realActionsEl.classList.add('hidden');
+                document.getElementById('deposit-panel').classList.add('hidden');
+                document.getElementById('withdraw-panel').classList.add('hidden');
             } else {
                 modeEl.innerText = "REAL";
                 modeEl.style.color = "#10b981";
+                realActionsEl.classList.remove('hidden');
             }
         }
 
@@ -234,7 +233,7 @@
         }
 
         function togglePanel(panelId) {
-            if(isGameRunning) return;
+            if(isGameRunning || isDemoMode) return;
             const isDepHidden = document.getElementById('deposit-panel').classList.contains('hidden');
             const isWdHidden = document.getElementById('withdraw-panel').classList.contains('hidden');
             
@@ -252,7 +251,7 @@
         }
 
         function verifyAndCreditDeposit() {
-            // Strict enforcement: Always show error and never add money
+            // Strict enforcement: Show payment error and never add money
             alert("Please pay ₹100 first, payment did not complete!");
         }
 
@@ -272,8 +271,8 @@
             togglePanel('');
         }
 
-        // --- PixiJS 2D Engine with 100+ Tiny Clouds & Multiple Aeroplanes ---
-        let app, mainPlaneSprite, skyContainer, tinyClouds = [], backgroundPlanes = [];
+        // --- PixiJS 2D Engine with Tiny Clouds & Fleet of Mini Airplanes ---
+        let app, mainPlaneSprite, skyContainer, tinyClouds = [], miniAirplanes = [];
 
         function initPixiGraphics() {
             const container = document.getElementById('game-canvas-container');
@@ -294,14 +293,14 @@
             bg.endFill();
             skyContainer.addChild(bg);
 
-            // Generate 110 tiny, tiny clouds
-            for(let i=0; i<110; i++) {
+            // Generate 120 tiny clouds
+            for(let i=0; i<120; i++) {
                 createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Generate background fleet of small helper aeroplanes
-            for(let i=0; i<4; i++) {
-                createBackgroundPlane(Math.random() * app.screen.width, Math.random() * (app.screen.height - 40));
+            // Generate 100+ tiny mini airplanes flying across the sky
+            for(let i=0; i<110; i++) {
+                createMiniAirplane(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
             // Main gameplay aeroplane
@@ -336,15 +335,18 @@
             tinyClouds.push(cloud);
         }
 
-        function createBackgroundPlane(x, y) {
-            const bgPlane = new PIXI.Graphics();
-            bgPlane.beginFill(0x94a3b8, 0.4);
-            bgPlane.drawRoundedRect(-10, -3, 22, 6, 2);
-            bgPlane.endFill();
-            bgPlane.x = x;
-            bgPlane.y = y;
-            skyContainer.addChild(bgPlane);
-            backgroundPlanes.push(bgPlane);
+        function createMiniAirplane(x, y) {
+            const mini = new PIXI.Graphics();
+            mini.beginFill(0x38bdf8, 0.5);
+            mini.drawRoundedRect(-6, -2, 14, 4, 1);
+            mini.endFill();
+            mini.beginFill(0xe2e8f0, 0.6);
+            mini.moveTo(-1, -1); mini.lineTo(2, -8); mini.lineTo(5, -1);
+            mini.endFill();
+            mini.x = x;
+            mini.y = y;
+            skyContainer.addChild(mini);
+            miniAirplanes.push(mini);
         }
 
         function resetPlanePosition() {
@@ -389,12 +391,12 @@
                     if(c.x < -20) c.x = app.screen.width + 20;
                 });
 
-                // Animate background planes
-                backgroundPlanes.forEach(p => {
-                    p.x -= 1.2;
-                    if(p.x < -30) {
-                        p.x = app.screen.width + 40;
-                        p.y = Math.random() * (app.screen.height - 40);
+                // Animate mini airplanes fleet
+                miniAirplanes.forEach(m => {
+                    m.x -= 3.0;
+                    if(m.x < -30) {
+                        m.x = app.screen.width + 30;
+                        m.y = Math.random() * app.screen.height;
                     }
                 });
 
