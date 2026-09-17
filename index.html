@@ -35,7 +35,7 @@
 
         #game-canvas-container {
             width: 100%;
-            height: 35vh;
+            height: 42vh; /* Increased height so bottom elements don't get clipped on mobile */
             position: relative;
             background: #020617;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
@@ -44,7 +44,7 @@
 
         #multiplier-overlay {
             position: absolute;
-            top: 50%;
+            top: 40%; /* Shifted slightly higher so it sits neatly above the plane */
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 1.8rem;
@@ -302,7 +302,7 @@
                 createMiniAirplane(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Main gameplay aeroplane (Styled larger and positioned right at the bottom edge, centered horizontally)
+            // Main gameplay aeroplane (Styled larger and positioned safely inside visible mobile bounds)
             const planeGfx = new PIXI.Graphics();
             planeGfx.beginFill(0xfcd34d); 
             planeGfx.drawRoundedRect(-24, -8, 54, 16, 5);
@@ -350,9 +350,9 @@
 
         function resetPlanePosition() {
             if(!mainPlaneSprite) return;
-            // Positioned right in the middle horizontally, and at the bottom edge vertically right below the score
+            // Positioned right in the middle horizontally, and comfortably above the bottom border so it never clips on mobile
             mainPlaneSprite.x = app.screen.width / 2;
-            mainPlaneSprite.y = app.screen.height - 20;
+            mainPlaneSprite.y = app.screen.height - 65;
             mainPlaneSprite.rotation = -0.1;
         }
 
