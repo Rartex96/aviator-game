@@ -251,7 +251,6 @@
         }
 
         function verifyAndCreditDeposit() {
-            // Strict enforcement: Show payment error and never add money
             alert("Please pay ₹100 first, payment did not complete!");
         }
 
@@ -271,7 +270,7 @@
             togglePanel('');
         }
 
-        // --- PixiJS 2D Engine with Tiny Clouds & Fleet of Mini Airplanes ---
+        // --- PixiJS 2D Engine ---
         let app, mainPlaneSprite, skyContainer, tinyClouds = [], miniAirplanes = [];
 
         function initPixiGraphics() {
@@ -293,27 +292,27 @@
             bg.endFill();
             skyContainer.addChild(bg);
 
-            // Generate 120 tiny clouds
+            // Generate tiny clouds
             for(let i=0; i<120; i++) {
                 createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Generate 100+ tiny mini airplanes flying across the sky
+            // Generate tiny mini airplanes flying across the sky
             for(let i=0; i<110; i++) {
                 createMiniAirplane(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Main gameplay aeroplane
+            // Main gameplay aeroplane (Styled larger and positioned right at the bottom edge)
             const planeGfx = new PIXI.Graphics();
             planeGfx.beginFill(0xfcd34d); 
-            planeGfx.drawRoundedRect(-20, -6, 45, 12, 4);
+            planeGfx.drawRoundedRect(-24, -8, 54, 16, 5);
             planeGfx.endFill();
             planeGfx.beginFill(0xe0e7ff);
-            planeGfx.moveTo(-4, -2); planeGfx.lineTo(8, -20); planeGfx.lineTo(16, -2);
-            planeGfx.moveTo(-4, 2); planeGfx.lineTo(8, 20); planeGfx.lineTo(16, 2);
+            planeGfx.moveTo(-5, -3); planeGfx.lineTo(10, -24); planeGfx.lineTo(20, -3);
+            planeGfx.moveTo(-5, 3); planeGfx.lineTo(10, 24); planeGfx.lineTo(20, 3);
             planeGfx.endFill();
             planeGfx.beginFill(0xef4444);
-            planeGfx.moveTo(-18, -6); planeGfx.lineTo(-26, -16); planeGfx.lineTo(-10, -6);
+            planeGfx.moveTo(-22, -8); planeGfx.lineTo(-32, -18); planeGfx.lineTo(-12, -8);
             planeGfx.endFill();
 
             mainPlaneSprite = new PIXI.Container();
@@ -351,9 +350,10 @@
 
         function resetPlanePosition() {
             if(!mainPlaneSprite) return;
-            mainPlaneSprite.x = 50;
-            mainPlaneSprite.y = app.screen.height - 20;
-            mainPlaneSprite.rotation = -0.15;
+            // Positioned right at the bottom border of the canvas container
+            mainPlaneSprite.x = 60;
+            mainPlaneSprite.y = app.screen.height - 18;
+            mainPlaneSprite.rotation = -0.1;
         }
 
         function placeBet(betAmount) {
