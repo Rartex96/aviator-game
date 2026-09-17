@@ -302,7 +302,7 @@
                 createMiniAirplane(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Main gameplay aeroplane (Styled larger and positioned right at the bottom edge)
+            // Main gameplay aeroplane (Styled larger and positioned right at the bottom edge, centered horizontally)
             const planeGfx = new PIXI.Graphics();
             planeGfx.beginFill(0xfcd34d); 
             planeGfx.drawRoundedRect(-24, -8, 54, 16, 5);
@@ -350,9 +350,9 @@
 
         function resetPlanePosition() {
             if(!mainPlaneSprite) return;
-            // Positioned right at the bottom border of the canvas container
-            mainPlaneSprite.x = 60;
-            mainPlaneSprite.y = app.screen.height - 18;
+            // Positioned right in the middle horizontally, and at the bottom edge vertically right below the score
+            mainPlaneSprite.x = app.screen.width / 2;
+            mainPlaneSprite.y = app.screen.height - 20;
             mainPlaneSprite.rotation = -0.1;
         }
 
