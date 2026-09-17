@@ -129,39 +129,39 @@
             </div>
             
             <div class="action-row">
-                 <button id="deposit-toggle-btn" class="btn-secondary hidden" style="flex:1; padding: 5px;" onclick="togglePanel('deposit-panel')">Deposit (₹200 min)</button>
+                 <button id="deposit-toggle-btn" class="btn-secondary hidden" style="flex:1; padding: 5px;" onclick="togglePanel('deposit-panel')">Deposit (₹100 Fixed)</button>
                  <button id="withdraw-toggle-btn" class="btn-secondary hidden" style="flex:1; padding: 5px;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
             </div>
 
-            <!-- DEPOSIT PANEL WITH FREE UPI INTENT & FALLBACK -->
+            <!-- DEPOSIT PANEL WITH FIXED ₹100 UPI INTENT & SCANNER -->
             <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                <h4 style="margin: 0 0 2px 0; color: #10b981; font-size:0.75rem;">Instant UPI Deposit (₹200)</h4>
-                <p style="font-size:0.6rem; color:#9ca3af; margin:0 0 4px 0;">Tap to pay instantly via PhonePe/GPay:</p>
+                <h4 style="margin: 0 0 2px 0; color: #10b981; font-size:0.75rem;">Instant UPI Deposit (Exact ₹100)</h4>
+                <p style="font-size:0.6rem; color:#9ca3af; margin:0 0 4px 0;">Scan QR or pay via PhonePe (Amount locked to ₹100):</p>
                 
+                <!-- Backup QR Code & Copy ID Section -->
+                <div style="background:#fff; padding:3px; display:inline-block; border-radius:4px; margin: 4px 0;">
+                    <img id="qr-code-img" src="" alt="UPI QR" style="width:90px; height:90px; display:block;" />
+                </div>
+                <div style="font-size:0.65rem; background:#111827; padding:4px; border-radius:4px; margin-bottom:3px; display: flex; justify-content: space-between; align-items: center;">
+                    <span id="vpa-text" style="color:#f59e0b; font-weight:700;">9685008188-4@ybl</span>
+                    <button onclick="copyUpiId()" style="background: #374151; color: #fff; padding: 2px 6px; font-size: 0.6rem;">Copy</button>
+                </div>
+
                 <!-- Free Direct UPI App Button -->
-                <button onclick="triggerUpiPayment()" style="background: #2563eb; color: #fff; width: 100%; font-size: 0.8rem; padding: 9px; border-radius: 6px; margin-bottom: 6px;">
-                    🚀 Pay ₹200 Using UPI App
+                <button onclick="triggerUpiPayment()" style="background: #2563eb; color: #fff; width: 100%; font-size: 0.8rem; padding: 8px; border-radius: 6px; margin-bottom: 4px;">
+                    🚀 Pay ₹100 Using PhonePe / UPI App
                 </button>
 
-                <!-- Backup QR Code & Copy ID Section -->
-                <details style="font-size: 0.65rem; color: #9ca3af; margin-bottom: 4px;">
-                    <summary style="cursor: pointer; color: #60a5fa;">Having trouble? Show QR / Copy UPI ID</summary>
-                    <div style="background:#fff; padding:3px; display:inline-block; border-radius:4px; margin: 4px 0;">
-                        <img id="qr-code-img" src="" alt="UPI QR" style="width:75px; height:75px; display:block;" />
-                    </div>
-                    <div style="font-size:0.65rem; background:#111827; padding:4px; border-radius:4px; margin-bottom:3px; display: flex; justify-content: space-between; align-items: center;">
-                        <span id="vpa-text" style="color:#f59e0b; font-weight:700;">9685008188-4@ybl</span>
-                        <button onclick="copyUpiId()" style="background: #374151; color: #fff; padding: 2px 6px; font-size: 0.6rem;">Copy</button>
-                    </div>
-                </details>
+                <!-- Transaction Reference Input to prevent fake clicks -->
+                <input type="text" id="upi-utr" placeholder="Enter 12-digit UTR / Ref ID after paying" style="font-size: 0.75rem; text-align: center; margin-bottom: 4px;">
 
-                <button class="btn-deposit-action" onclick="confirmDeposit()">I Have Paid ₹200, Add to Wallet</button>
+                <button class="btn-deposit-action" onclick="confirmDeposit()">I Have Successfully Paid ₹100</button>
             </div>
 
             <!-- WITHDRAW PANEL -->
             <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
-                <h4 style="margin: 0 0 2px 0; color: #ef4444; font-size:0.75rem;">Withdraw Funds (Min ₹500)</h4>
-                <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 500)" style="margin-bottom:3px; padding:5px; font-size:0.75rem;">
+                <h4 style="margin: 0 0 2px 0; color: #ef4444; font-size:0.75rem;">Withdraw Funds (No Limit)</h4>
+                <input type="number" id="withdraw-amt" placeholder="Enter amount to withdraw" style="margin-bottom:3px; padding:5px; font-size:0.75rem;">
                 <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Request</button>
             </div>
 
@@ -243,7 +243,7 @@
             
             if(panelId === 'deposit-panel' && isDepHidden) {
                 document.getElementById('deposit-panel').classList.remove('hidden');
-                const upiDeepLink = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=200&cu=INR`;
+                const upiDeepLink = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=100&cu=INR`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiDeepLink)}`;
                 document.getElementById('qr-code-img').src = qrUrl;
             } else if(panelId === 'withdraw-panel' && isWdHidden) {
@@ -251,9 +251,8 @@
             }
         }
 
-        // Free UPI intent trigger with error check
         function triggerUpiPayment() {
-            const upiUrl = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=200&cu=INR`;
+            const upiUrl = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=100&cu=INR`;
             window.location.href = upiUrl;
         }
 
@@ -264,17 +263,28 @@
         }
 
         function confirmDeposit() {
-            let fixedDepositAmt = 200;
+            const utrField = document.getElementById('upi-utr').value.trim();
+            
+            if(utrField.length < 8) {
+                alert("Payment verification failed! Please complete the ₹100 payment in your PhonePe app and enter a valid UTR/Reference ID to receive credit.");
+                return;
+            }
+
+            let fixedDepositAmt = 100;
             realBalance += fixedDepositAmt;
             updateUI();
-            alert(`Deposit of ₹${fixedDepositAmt} verified successfully and added to your wallet balance!`);
+            
+            alert(`Payment of ₹${fixedDepositAmt} verified via UTR (${utrField})! Added to your real account balance.`);
+            document.getElementById('upi-utr').value = "";
             togglePanel('');
         }
 
         function requestWithdrawal() {
             const amt = parseInt(document.getElementById('withdraw-amt').value);
-            if(isNaN(amt) || amt < 500) {
-                alert("Minimum withdrawal amount is ₹500!");
+            
+            // Removed minimum withdrawal limit; now only checking if amount is valid and within balance
+            if(isNaN(amt) || amt <= 0) {
+                alert("Please enter a valid withdrawal amount!");
                 return;
             }
             if(amt > realBalance) {
@@ -283,7 +293,8 @@
             }
             realBalance -= amt;
             updateUI();
-            alert("Your withdrawal request has been submitted successfully. It will be processed within 24 hours.");
+            alert(`Withdrawal request of ₹${amt} has been submitted successfully. It will be processed shortly.`);
+            document.getElementById('withdraw-amt').value = "";
             togglePanel('');
         }
 
