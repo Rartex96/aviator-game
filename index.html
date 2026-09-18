@@ -19,7 +19,6 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            position: fixed;
         }
 
         .hidden { display: none !important; }
@@ -28,14 +27,14 @@
             display: flex;
             flex-direction: column;
             width: 100vw;
-            height: 100vh;
-            height: 100dvh;
+            height: 100dvh; /* Dynamic viewport height for perfect mobile scaling */
             position: relative;
+            overflow: hidden;
         }
 
         #game-canvas-container {
             width: 100%;
-            height: 48vh; 
+            height: 42vh; /* Fixed proportion for canvas */
             position: relative;
             background: #020617;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
@@ -44,7 +43,7 @@
 
         #multiplier-overlay {
             position: absolute;
-            top: 45%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 2rem;
@@ -59,19 +58,19 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 8px 10px;
+            padding: 6px 10px;
             background: #111827;
             border-top: 2px solid #374151;
-            overflow-y: auto;
+            overflow-y: auto; /* Ensures Android users can scroll if screen is compact */
             width: 100%;
             -webkit-overflow-scrolling: touch;
         }
 
         .card { 
             background: #1f2937; 
-            padding: 8px 10px; 
+            padding: 6px 10px; 
             border-radius: 8px; 
-            margin-bottom: 6px; 
+            margin-bottom: 4px; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.3); 
         }
         
@@ -89,22 +88,22 @@
         button:active { transform: scale(0.96); }
 
         .btn-primary { background: #f59e0b; color: #111; width: 100%; font-size: 1rem; padding: 12px; }
-        .btn-secondary { background: #4f46e5; color: #fff; font-size: 0.75rem; padding: 8px 10px; }
-        .btn-deposit-action { background: #10b981; color: #fff; width: 100%; font-size: 0.8rem; padding: 8px; margin-top: 4px; }
-        .btn-withdraw { background: #ef4444; color: #fff; width: 100%; font-size: 0.8rem; padding: 8px; margin-top: 4px; }
+        .btn-secondary { background: #4f46e5; color: #fff; font-size: 0.75rem; padding: 6px 10px; }
+        .btn-deposit-action { background: #10b981; color: #fff; width: 100%; font-size: 0.8rem; padding: 6px; margin-top: 4px; }
+        .btn-withdraw { background: #ef4444; color: #fff; width: 100%; font-size: 0.8rem; padding: 6px; margin-top: 4px; }
         
         .bet-controls { display: flex; justify-content: center; gap: 6px; }
-        .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 0.95rem; padding: 10px 0; border-radius: 8px; box-shadow: 0 3px 10px rgba(59, 130, 246, 0.4); }
+        .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 0.9rem; padding: 8px 0; border-radius: 8px; box-shadow: 0 3px 10px rgba(59, 130, 246, 0.4); }
 
         #auth-section { margin: auto; background: #1f2937; padding: 25px; border-radius: 16px; width: 90%; max-width: 380px; border: 1px solid #374151; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
         .auth-tabs { display: flex; margin-bottom: 15px; background: #111827; border-radius: 8px; padding: 4px; }
         .auth-tab { flex: 1; background: transparent; color: #9ca3af; padding: 10px; border-radius: 6px; font-size: 0.9rem; }
         .auth-tab.active { background: #4f46e5; color: #fff; }
 
-        input { width: 100%; padding: 8px; margin-bottom: 6px; border-radius: 6px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.85rem; }
-        #game-status { font-weight: 700; min-height: 16px; font-size: 0.8rem; margin: 6px 0 0 0; }
+        input { width: 100%; padding: 6px; margin-bottom: 4px; border-radius: 6px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.85rem; }
+        #game-status { font-weight: 700; min-height: 14px; font-size: 0.75rem; margin: 4px 0 0 0; }
         
-        .action-row { display: flex; gap: 6px; margin-bottom: 6px; }
+        .action-row { display: flex; gap: 6px; margin-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -136,11 +135,11 @@
                 <!-- TOP HUD & SWITCH MODE ROW -->
                 <div class="hud-row card">
                     <div style="text-align: left;">
-                        <div style="color: #9ca3af; font-size: 0.65rem;">Wallet Balance</div>
-                        <div style="font-size: 1.1rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
+                        <div style="color: #9ca3af; font-size: 0.6rem;">Wallet Balance</div>
+                        <div style="font-size: 1rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <span id="mode-display" style="background: #374151; padding: 3px 8px; border-radius: 4px; color: #60a5fa; font-size: 0.7rem; font-weight: 700;">DEMO</span>
+                        <span id="mode-display" style="background: #374151; padding: 3px 6px; border-radius: 4px; color: #60a5fa; font-size: 0.65rem; font-weight: 700;">DEMO</span>
                         <button class="btn-secondary" onclick="switchMode()">Switch Mode</button>
                     </div>
                 </div>
@@ -153,16 +152,16 @@
 
                 <!-- DEPOSIT PANEL -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                    <h4 style="margin: 0 0 4px 0; color: #10b981; font-size:0.75rem;">Scan & Pay ₹100 via UPI</h4>
-                    <div style="background:#fff; padding:4px; display:inline-block; border-radius:6px; margin: 2px 0;">
-                        <img id="qr-code-img" alt="UPI QR" style="width:90px; height:90px; display:block;" />
+                    <h4 style="margin: 0 0 2px 0; color: #10b981; font-size:0.7rem;">Scan & Pay ₹100 via UPI</h4>
+                    <div style="background:#fff; padding:3px; display:inline-block; border-radius:6px; margin: 2px 0;">
+                        <img id="qr-code-img" alt="UPI QR" style="width:80px; height:80px; display:block;" />
                     </div>
                     <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹100</button>
                 </div>
 
                 <!-- WITHDRAW PANEL -->
                 <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
-                    <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size:0.8rem;">Withdraw Funds (Min ₹100)</h4>
+                    <h4 style="margin: 0 0 2px 0; color: #ef4444; font-size:0.75rem;">Withdraw Funds (Min ₹100)</h4>
                     <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 100)">
                     <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Request</button>
                 </div>
@@ -293,12 +292,11 @@
             bg.endFill();
             skyContainer.addChild(bg);
 
-            // Generate calm background clouds
             for(let i=0; i<30; i++) {
                 createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Create 60+ main airplanes arranged in precise horizontal and vertical lines (Grid: 10 columns x 6 rows = 60 airplanes)
+            // Create 60 airplanes arranged in precise horizontal and vertical lines (Grid: 10 columns x 6 rows)
             mainPlanes = [];
             initialPlanePositions = [];
             
@@ -310,15 +308,15 @@
             for(let r = 1; r <= rows; r++) {
                 for(let c = 1; c <= cols; c++) {
                     const planeGfx = new PIXI.Graphics();
-                    planeGfx.beginFill(0xfcd34d); // Fuselage
-                    planeGfx.drawRoundedRect(-16, -5, 36, 11, 3);
+                    planeGfx.beginFill(0xfcd34d); 
+                    planeGfx.drawRoundedRect(-14, -4, 32, 10, 3);
                     planeGfx.endFill();
-                    planeGfx.beginFill(0xe0e7ff); // Wings
-                    planeGfx.moveTo(-2, -3); planeGfx.lineTo(7, -18); planeGfx.lineTo(15, -3);
-                    planeGfx.moveTo(-2, 3); planeGfx.lineTo(7, 18); planeGfx.lineTo(15, 3);
+                    planeGfx.beginFill(0xe0e7ff); 
+                    planeGfx.moveTo(-2, -3); planeGfx.lineTo(6, -15); planeGfx.lineTo(13, -3);
+                    planeGfx.moveTo(-2, 3); planeGfx.lineTo(6, 15); planeGfx.lineTo(13, 3);
                     planeGfx.endFill();
-                    planeGfx.beginFill(0xef4444); // Tail wing
-                    planeGfx.moveTo(-14, -5); planeGfx.lineTo(-21, -12); planeGfx.lineTo(-7, -5);
+                    planeGfx.beginFill(0xef4444); 
+                    planeGfx.moveTo(-12, -4); planeGfx.lineTo(-18, -10); planeGfx.lineTo(-6, -4);
                     planeGfx.endFill();
 
                     const planeSprite = new PIXI.Container();
@@ -329,8 +327,8 @@
                     
                     planeSprite.x = posX;
                     planeSprite.y = posY;
-                    planeSprite.scale.set(0.9);
-                    planeSprite.rotation = -0.45; // Upward angle trajectory
+                    planeSprite.scale.set(0.8);
+                    planeSprite.rotation = -0.45;
 
                     skyContainer.addChild(planeSprite);
                     mainPlanes.push(planeSprite);
@@ -401,7 +399,6 @@
                     clearInterval(gameInterval);
                     isGameRunning = false;
                     
-                    // Crash animation
                     mainPlanes.forEach(plane => {
                         plane.y += 15;
                         plane.rotation = 0.4;
@@ -412,7 +409,6 @@
                     multiEl.innerText = targetCrashPoint + "X";
                     updateUI();
                 } else {
-                    // Smooth flight climb upwards across the canvas
                     mainPlanes.forEach(plane => {
                         plane.y -= 0.5;
                         plane.x += 0.3;
