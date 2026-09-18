@@ -34,10 +34,10 @@
 
         #game-canvas-container {
             width: 100%;
-            height: 25vh; /* Fixed small sky height */
+            height: 12vh; /* Minimized sky height matching your red line */
             position: relative;
             background: #020617;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.7);
             flex-shrink: 0;
         }
 
@@ -46,11 +46,11 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: #fff;
             pointer-events: none;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 25px rgba(255,215,0,0.6);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.9);
             z-index: 10;
         }
 
@@ -64,7 +64,7 @@
             background: #111827;
             border-top: 2px solid #374151;
             width: 100%;
-            overflow-y: auto; /* Allows scrolling if panels open */
+            overflow-y: auto; /* Ensures all buttons and panels are scrollable and visible */
         }
 
         .card { 
@@ -293,7 +293,7 @@
             bg.endFill();
             skyContainer.addChild(bg);
 
-            for(let i=0; i<20; i++) {
+            for(let i=0; i<15; i++) {
                 createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
@@ -301,7 +301,7 @@
             initialPlanePositions = [];
             
             const cols = 3;
-            const rows = 2;
+            const rows = 1; // Adjusted rows for smaller 12vh height
             const xStep = app.screen.width / (cols + 1);
             const yStep = app.screen.height / (rows + 1);
 
@@ -309,14 +309,14 @@
                 for(let c = 1; c <= cols; c++) {
                     const planeGfx = new PIXI.Graphics();
                     planeGfx.beginFill(0xfcd34d); 
-                    planeGfx.drawRoundedRect(-18, -5, 42, 12, 3);
+                    planeGfx.drawRoundedRect(-15, -4, 35, 10, 2);
                     planeGfx.endFill();
                     planeGfx.beginFill(0xe0e7ff); 
-                    planeGfx.moveTo(-3, -3); planeGfx.lineTo(8, -20); planeGfx.lineTo(16, -3);
-                    planeGfx.moveTo(-3, 3); planeGfx.lineTo(8, 20); planeGfx.lineTo(16, 3);
+                    planeGfx.moveTo(-2, -2); planeGfx.lineTo(6, -15); planeGfx.lineTo(12, -2);
+                    planeGfx.moveTo(-2, 2); planeGfx.lineTo(6, 15); planeGfx.lineTo(12, 2);
                     planeGfx.endFill();
                     planeGfx.beginFill(0xef4444); 
-                    planeGfx.moveTo(-15, -5); planeGfx.lineTo(-23, -12); planeGfx.lineTo(-8, -5);
+                    planeGfx.moveTo(-12, -4); planeGfx.lineTo(-18, -10); planeGfx.lineTo(-6, -4);
                     planeGfx.endFill();
 
                     const planeSprite = new PIXI.Container();
@@ -327,7 +327,7 @@
                     
                     planeSprite.x = posX;
                     planeSprite.y = posY;
-                    planeSprite.scale.set(0.8);
+                    planeSprite.scale.set(0.65);
                     planeSprite.rotation = -0.45;
 
                     skyContainer.addChild(planeSprite);
@@ -400,7 +400,7 @@
                     isGameRunning = false;
                     
                     mainPlanes.forEach(plane => {
-                        plane.y += 8;
+                        plane.y += 6;
                         plane.rotation = 0.4;
                     });
                     
@@ -410,7 +410,7 @@
                     updateUI();
                 } else {
                     mainPlanes.forEach(plane => {
-                        plane.y -= 0.3;
+                        plane.y -= 0.2;
                         plane.x += 0.2;
                     });
                     
