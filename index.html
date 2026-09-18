@@ -34,7 +34,7 @@
 
         #game-canvas-container {
             width: 100%;
-            height: 22vh; /* Reduced height so all buttons and status messages fit perfectly */
+            height: 25vh; /* Compact sky area */
             position: relative;
             background: #020617;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
@@ -46,7 +46,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 800;
             color: #fff;
             pointer-events: none;
@@ -58,8 +58,9 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-evenly;
-            padding: 4px 8px;
+            justify-content: flex-start;
+            gap: 4px;
+            padding: 6px 10px;
             background: #111827;
             border-top: 2px solid #374151;
             width: 100%;
@@ -68,9 +69,8 @@
 
         .card { 
             background: #1f2937; 
-            padding: 6px 8px; 
+            padding: 6px 10px; 
             border-radius: 6px; 
-            margin-bottom: 3px; 
             box-shadow: 0 2px 6px rgba(0,0,0,0.3); 
         }
         
@@ -88,9 +88,9 @@
         button:active { transform: scale(0.96); }
 
         .btn-primary { background: #f59e0b; color: #111; width: 100%; font-size: 0.95rem; padding: 10px; }
-        .btn-secondary { background: #4f46e5; color: #fff; font-size: 0.7rem; padding: 5px 8px; }
-        .btn-deposit-action { background: #10b981; color: #fff; width: 100%; font-size: 0.75rem; padding: 5px; margin-top: 3px; }
-        .btn-withdraw { background: #ef4444; color: #fff; width: 100%; font-size: 0.75rem; padding: 5px; margin-top: 3px; }
+        .btn-secondary { background: #4f46e5; color: #fff; font-size: 0.65rem; padding: 4px 8px; }
+        .btn-deposit-action { background: #10b981; color: #fff; width: 100%; font-size: 0.7rem; padding: 4px; margin-top: 2px; }
+        .btn-withdraw { background: #ef4444; color: #fff; width: 100%; font-size: 0.7rem; padding: 4px; margin-top: 2px; }
         
         .bet-controls { display: flex; justify-content: center; gap: 6px; }
         .bet-btn { background: #3b82f6; color: white; width: 32%; font-size: 0.85rem; padding: 8px 0; border-radius: 6px; box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4); }
@@ -100,10 +100,10 @@
         .auth-tab { flex: 1; background: transparent; color: #9ca3af; padding: 10px; border-radius: 6px; font-size: 0.9rem; }
         .auth-tab.active { background: #4f46e5; color: #fff; }
 
-        input { width: 100%; padding: 6px; margin-bottom: 4px; border-radius: 6px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.8rem; }
-        #game-status { font-weight: 700; min-height: 14px; font-size: 0.7rem; margin: 2px 0 0 0; }
+        input { width: 100%; padding: 5px; margin-bottom: 3px; border-radius: 6px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.75rem; }
+        #game-status { font-weight: 700; min-height: 14px; font-size: 0.7rem; margin: 4px 0 0 0; }
         
-        .action-row { display: flex; gap: 6px; margin-bottom: 3px; }
+        .action-row { display: flex; gap: 6px; }
     </style>
 </head>
 <body>
@@ -135,11 +135,11 @@
                 <!-- TOP HUD & SWITCH MODE ROW -->
                 <div class="hud-row card">
                     <div style="text-align: left;">
-                        <div style="color: #9ca3af; font-size: 0.55rem;">Wallet Balance</div>
-                        <div style="font-size: 0.95rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
+                        <div style="color: #9ca3af; font-size: 0.5rem;">Wallet Balance</div>
+                        <div style="font-size: 0.9rem; font-weight: 800;">₹<span id="balance-display">10000</span></div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <span id="mode-display" style="background: #374151; padding: 2px 6px; border-radius: 4px; color: #60a5fa; font-size: 0.6rem; font-weight: 700;">DEMO</span>
+                        <span id="mode-display" style="background: #374151; padding: 2px 6px; border-radius: 4px; color: #60a5fa; font-size: 0.55rem; font-weight: 700;">DEMO</span>
                         <button class="btn-secondary" onclick="switchMode()">Switch Mode</button>
                     </div>
                 </div>
@@ -152,22 +152,22 @@
 
                 <!-- DEPOSIT PANEL -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                    <h4 style="margin: 0 0 2px 0; color: #10b981; font-size:0.65rem;">Scan & Pay ₹100 via UPI</h4>
-                    <div style="background:#fff; padding:2px; display:inline-block; border-radius:4px; margin: 1px 0;">
-                        <img id="qr-code-img" alt="UPI QR" style="width:70px; height:70px; display:block;" />
+                    <h4 style="margin: 0 0 2px 0; color: #10b981; font-size: 0.6rem;">Scan & Pay ₹100 via UPI</h4>
+                    <div style="background:#fff; padding:2px; display:inline-block; border-radius:4px;">
+                        <img id="qr-code-img" alt="UPI QR" style="width:60px; height:60px; display:block;" />
                     </div>
                     <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹100</button>
                 </div>
 
                 <!-- WITHDRAW PANEL -->
                 <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
-                    <h4 style="margin: 0 0 2px 0; color: #ef4444; font-size:0.7rem;">Withdraw Funds (Min ₹100)</h4>
+                    <h4 style="margin: 0 0 2px 0; color: #ef4444; font-size: 0.6rem;">Withdraw Funds (Min ₹100)</h4>
                     <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 100)">
                     <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Request</button>
                 </div>
 
                 <!-- BET CONTROLS SECTION -->
-                <div class="card" style="margin-top: auto;">
+                <div class="card">
                     <div class="bet-controls">
                         <button class="bet-btn" onclick="placeBet(30)">₹30</button>
                         <button class="bet-btn" onclick="placeBet(60)">₹60</button>
@@ -292,11 +292,10 @@
             bg.endFill();
             skyContainer.addChild(bg);
 
-            for(let i=0; i<30; i++) {
+            for(let i=0; i<20; i++) {
                 createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // 3 columns and 2 rows grid layout
             mainPlanes = [];
             initialPlanePositions = [];
             
@@ -309,14 +308,14 @@
                 for(let c = 1; c <= cols; c++) {
                     const planeGfx = new PIXI.Graphics();
                     planeGfx.beginFill(0xfcd34d); 
-                    planeGfx.drawRoundedRect(-22, -6, 50, 15, 4);
+                    planeGfx.drawRoundedRect(-18, -5, 42, 12, 3);
                     planeGfx.endFill();
                     planeGfx.beginFill(0xe0e7ff); 
-                    planeGfx.moveTo(-4, -4); planeGfx.lineTo(10, -24); planeGfx.lineTo(20, -4);
-                    planeGfx.moveTo(-4, 4); planeGfx.lineTo(10, 24); planeGfx.lineTo(20, 4);
+                    planeGfx.moveTo(-3, -3); planeGfx.lineTo(8, -20); planeGfx.lineTo(16, -3);
+                    planeGfx.moveTo(-3, 3); planeGfx.lineTo(8, 20); planeGfx.lineTo(16, 3);
                     planeGfx.endFill();
                     planeGfx.beginFill(0xef4444); 
-                    planeGfx.moveTo(-18, -6); planeGfx.lineTo(-28, -14); planeGfx.lineTo(-10, -6);
+                    planeGfx.moveTo(-15, -5); planeGfx.lineTo(-23, -12); planeGfx.lineTo(-8, -5);
                     planeGfx.endFill();
 
                     const planeSprite = new PIXI.Container();
@@ -327,7 +326,7 @@
                     
                     planeSprite.x = posX;
                     planeSprite.y = posY;
-                    planeSprite.scale.set(0.9);
+                    planeSprite.scale.set(0.8);
                     planeSprite.rotation = -0.45;
 
                     skyContainer.addChild(planeSprite);
@@ -340,9 +339,9 @@
         function createTinyCloud(x, y) {
             const cloud = new PIXI.Graphics();
             cloud.beginFill(0xffffff, 0.25);
-            cloud.drawCircle(0, 0, 4);
-            cloud.drawCircle(6, -3, 7);
-            cloud.drawCircle(12, 0, 4);
+            cloud.drawCircle(0, 0, 3);
+            cloud.drawCircle(5, -2, 5);
+            cloud.drawCircle(10, 0, 3);
             cloud.endFill();
             cloud.x = x;
             cloud.y = y;
@@ -400,7 +399,7 @@
                     isGameRunning = false;
                     
                     mainPlanes.forEach(plane => {
-                        plane.y += 10;
+                        plane.y += 8;
                         plane.rotation = 0.4;
                     });
                     
