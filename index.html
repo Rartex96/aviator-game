@@ -34,7 +34,7 @@
 
         #game-canvas-container {
             width: 100%;
-            height: 36vh; /* Compact height so dashboard fits completely below */
+            height: 36vh; 
             position: relative;
             background: #020617;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
@@ -46,7 +46,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 800;
             color: #fff;
             pointer-events: none;
@@ -296,12 +296,12 @@
                 createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Create 60 airplanes arranged in precise horizontal and vertical lines (Grid: 10 columns x 6 rows)
+            // Updated to 3 columns and 2 rows for a clean look
             mainPlanes = [];
             initialPlanePositions = [];
             
-            const cols = 10;
-            const rows = 6;
+            const cols = 3;
+            const rows = 2;
             const xStep = app.screen.width / (cols + 1);
             const yStep = app.screen.height / (rows + 1);
 
@@ -309,14 +309,14 @@
                 for(let c = 1; c <= cols; c++) {
                     const planeGfx = new PIXI.Graphics();
                     planeGfx.beginFill(0xfcd34d); 
-                    planeGfx.drawRoundedRect(-14, -4, 32, 10, 3);
+                    planeGfx.drawRoundedRect(-22, -6, 50, 15, 4);
                     planeGfx.endFill();
                     planeGfx.beginFill(0xe0e7ff); 
-                    planeGfx.moveTo(-2, -3); planeGfx.lineTo(6, -15); planeGfx.lineTo(13, -3);
-                    planeGfx.moveTo(-2, 3); planeGfx.lineTo(6, 15); planeGfx.lineTo(13, 3);
+                    planeGfx.moveTo(-4, -4); planeGfx.lineTo(10, -24); planeGfx.lineTo(20, -4);
+                    planeGfx.moveTo(-4, 4); planeGfx.lineTo(10, 24); planeGfx.lineTo(20, 4);
                     planeGfx.endFill();
                     planeGfx.beginFill(0xef4444); 
-                    planeGfx.moveTo(-12, -4); planeGfx.lineTo(-18, -10); planeGfx.lineTo(-6, -4);
+                    planeGfx.moveTo(-18, -6); planeGfx.lineTo(-28, -14); planeGfx.lineTo(-10, -6);
                     planeGfx.endFill();
 
                     const planeSprite = new PIXI.Container();
@@ -327,7 +327,7 @@
                     
                     planeSprite.x = posX;
                     planeSprite.y = posY;
-                    planeSprite.scale.set(0.8);
+                    planeSprite.scale.set(1.1);
                     planeSprite.rotation = -0.45;
 
                     skyContainer.addChild(planeSprite);
