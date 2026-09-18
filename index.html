@@ -34,7 +34,7 @@
 
         #game-canvas-container {
             width: 100%;
-            height: 36vh; 
+            height: 22vh; /* Reduced height so all buttons and status messages fit perfectly */
             position: relative;
             background: #020617;
             box-shadow: 0 4px 15px rgba(0,0,0,0.7);
@@ -46,7 +46,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 800;
             color: #fff;
             pointer-events: none;
@@ -296,7 +296,7 @@
                 createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * app.screen.height);
             }
 
-            // Updated to 3 columns and 2 rows for a clean look
+            // 3 columns and 2 rows grid layout
             mainPlanes = [];
             initialPlanePositions = [];
             
@@ -327,7 +327,7 @@
                     
                     planeSprite.x = posX;
                     planeSprite.y = posY;
-                    planeSprite.scale.set(1.1);
+                    planeSprite.scale.set(0.9);
                     planeSprite.rotation = -0.45;
 
                     skyContainer.addChild(planeSprite);
@@ -400,7 +400,7 @@
                     isGameRunning = false;
                     
                     mainPlanes.forEach(plane => {
-                        plane.y += 15;
+                        plane.y += 10;
                         plane.rotation = 0.4;
                     });
                     
@@ -410,8 +410,8 @@
                     updateUI();
                 } else {
                     mainPlanes.forEach(plane => {
-                        plane.y -= 0.5;
-                        plane.x += 0.3;
+                        plane.y -= 0.3;
+                        plane.x += 0.2;
                     });
                     
                     if (currentMultiplier >= (targetCrashPoint - 0.4) && Math.random() < 0.4) {
