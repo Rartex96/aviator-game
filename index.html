@@ -32,7 +32,6 @@
             overflow: hidden;
         }
 
-        /* Game panel height reduced to match the red line */
         #game-canvas-container {
             width: 100%;
             height: 10vh; 
@@ -59,7 +58,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Pushes content/buttons downward to match your marker */
+            justify-content: flex-end;
             gap: 6px;
             padding: 8px 12px 24px 12px;
             background: #111827;
@@ -148,24 +147,25 @@
                 
                 <!-- REAL-MODE ONLY ACTION ROW -->
                 <div id="real-actions-container" class="action-row hidden">
-                     <button id="deposit-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('deposit-panel')">Deposit (₹100)</button>
+                     <button id="deposit-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('deposit-panel')">Deposit (₹200)</button>
                      <button id="withdraw-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
 
                 <!-- DEPOSIT PANEL -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                    <h4 style="margin: 0 0 4px 0; color: #10b981; font-size: 0.7rem;">Scan & Pay ₹100 via UPI</h4>
+                    <h4 style="margin: 0 0 4px 0; color: #10b981; font-size: 0.7rem;">Scan & Pay ₹200 via UPI</h4>
                     <div style="background:#fff; padding:3px; display:inline-block; border-radius:4px;">
                         <img id="qr-code-img" alt="UPI QR" style="width:70px; height:70px; display:block;" />
                     </div>
-                    <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹100</button>
+                    <button class="btn-deposit-action" onclick="verifyAndCreditDeposit()">Verify & Add ₹200</button>
                 </div>
 
                 <!-- WITHDRAW PANEL -->
                 <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
-                    <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size: 0.7rem;">Withdraw Funds (Min ₹100)</h4>
-                    <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 100)">
-                    <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Request</button>
+                    <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size: 0.7rem;">Withdraw Funds (Min ₹200)</h4>
+                    <input type="number" id="withdraw-amt" placeholder="Enter withdrawal amount (Min 200)">
+                    <input type="text" id="withdraw-upi" placeholder="Enter your UPI ID (e.g. name@paytm)">
+                    <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Withdrawal</button>
                 </div>
 
                 <!-- BET CONTROLS SECTION -->
@@ -243,31 +243,39 @@
             
             if(panelId === 'deposit-panel' && isDepHidden) {
                 document.getElementById('deposit-panel').classList.remove('hidden');
-                const upiDeepLink = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorGaming&am=100&cu=INR`;
+                // Pre-filled amount set to 200 in upi deep link query string
+                const upiDeepLink = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=RajeshSapkale&am=200&cu=INR`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiDeepLink)}`;
                 document.getElementById('qr-code-img').src = qrUrl;
             } else if(panelId === 'withdraw-panel' && isWdHidden) {
-                document.getElementById('withdraw-panel').classList.add('hidden');
+                document.getElementById('withdraw-panel').classList.remove('hidden');
             }
         }
 
         function verifyAndCreditDeposit() {
-            alert("Please pay ₹100 first, payment did not complete!");
+            alert("Please pay ₹200 first, payment verification pending!");
         }
 
         function requestWithdrawal() {
             const amt = parseInt(document.getElementById('withdraw-amt').value);
-            if(isNaN(amt) || amt < 100) {
-                alert("Minimum withdrawal amount is ₹100!");
+            const upiId = document.getElementById('withdraw-upi').value.trim();
+
+            if(isNaN(amt) || amt < 200) {
+                alert("Minimum withdrawal amount is ₹200!");
                 return;
             }
             if(amt > realBalance) {
-                alert("Insufficient real wallet balance!");
+                alert("Insufficient real wallet balance to withdraw this amount!");
                 return;
             }
+            if(!upiId || !upiId.includes('@')) {
+                alert("Please enter a valid destination UPI ID (e.g., username@paytm)!");
+                return;
+            }
+
             realBalance -= amt;
             updateUI();
-            alert("Your withdrawal request has been submitted successfully and will be processed soon.");
+            alert(`Withdrawal request of ₹${amt} to UPI ID '${upiId}' submitted successfully!`);
             togglePanel('');
         }
 
