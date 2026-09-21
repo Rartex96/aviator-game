@@ -32,25 +32,26 @@
             overflow: hidden;
         }
 
+        /* Minimized and compact game canvas height as requested */
         #game-canvas-container {
             width: 100%;
-            height: 38vh;
+            height: 22vh;
             position: relative;
             background: #030712;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
             flex-shrink: 0;
         }
 
         #multiplier-overlay {
             position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 1.4rem;
+            top: 10px;
+            right: 15px;
+            font-size: 1.1rem;
             font-weight: 900;
             color: #34d399;
-            background: rgba(3, 7, 18, 0.75);
-            padding: 4px 12px;
-            border-radius: 8px;
+            background: rgba(3, 7, 18, 0.8);
+            padding: 3px 10px;
+            border-radius: 6px;
             border: 1px solid rgba(52, 211, 153, 0.3);
             pointer-events: none;
             z-index: 10;
@@ -61,8 +62,8 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            gap: 8px;
-            padding: 10px 14px 20px 14px;
+            gap: 6px;
+            padding: 8px 12px 16px 12px;
             background: #111827;
             border-top: 2px solid #1f2937;
             width: 100%;
@@ -71,9 +72,9 @@
 
         .card { 
             background: #1f2937; 
-            padding: 10px 14px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
+            padding: 8px 12px; 
+            border-radius: 10px; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.4); 
             flex-shrink: 0;
             border: 1px solid #374151;
         }
@@ -91,21 +92,21 @@
         }
         button:active { transform: scale(0.97); }
 
-        .btn-primary { background: #f59e0b; color: #111; width: 100%; font-size: 0.95rem; padding: 12px; }
-        .btn-secondary { background: #4f46e5; color: #fff; font-size: 0.75rem; padding: 8px 12px; }
-        .btn-withdraw { background: #ef4444; color: #fff; width: 100%; font-size: 0.8rem; padding: 8px; margin-top: 6px; }
+        .btn-primary { background: #f59e0b; color: #111; width: 100%; font-size: 0.9rem; padding: 10px; }
+        .btn-secondary { background: #4f46e5; color: #fff; font-size: 0.7rem; padding: 6px 10px; }
+        .btn-withdraw { background: #ef4444; color: #fff; width: 100%; font-size: 0.75rem; padding: 6px; margin-top: 4px; }
         
-        .trade-controls { display: flex; gap: 12px; }
-        .trade-btn-buy { background: linear-gradient(135deg, #10b981, #059669); color: white; flex: 1; font-size: 1.1rem; padding: 14px 0; border-radius: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
-        .trade-btn-sell { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; flex: 1; font-size: 1.1rem; padding: 14px 0; border-radius: 10px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+        .trade-controls { display: flex; gap: 10px; }
+        .trade-btn-buy { background: linear-gradient(135deg, #10b981, #059669); color: white; flex: 1; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
+        .trade-btn-sell { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; flex: 1; font-size: 1rem; padding: 12px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); }
 
-        #auth-section { margin: auto; background: #1f2937; padding: 30px; border-radius: 20px; width: 90%; max-width: 380px; border: 1px solid #374151; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-        .auth-tabs { display: flex; margin-bottom: 20px; background: #111827; border-radius: 8px; padding: 4px; }
-        .auth-tab { flex: 1; background: transparent; color: #9ca3af; padding: 10px; border-radius: 6px; font-size: 0.9rem; }
+        #auth-section { margin: auto; background: #1f2937; padding: 25px; border-radius: 16px; width: 90%; max-width: 360px; border: 1px solid #374151; box-shadow: 0 8px 25px rgba(0,0,0,0.6); }
+        .auth-tabs { display: flex; margin-bottom: 15px; background: #111827; border-radius: 8px; padding: 4px; }
+        .auth-tab { flex: 1; background: transparent; color: #9ca3af; padding: 8px; border-radius: 6px; font-size: 0.85rem; }
         .auth-tab.active { background: #4f46e5; color: #fff; }
 
-        input { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.85rem; }
-        #trade-status { font-weight: 700; min-height: 20px; font-size: 0.8rem; margin: 8px 0 0 0; color: #34d399; }
+        input { width: 100%; padding: 8px; margin-bottom: 6px; border-radius: 6px; border: 1px solid #4b5563; background: #374151; color: #fff; font-size: 0.8rem; }
+        #trade-status { font-weight: 700; min-height: 18px; font-size: 0.75rem; margin: 6px 0 0 0; color: #34d399; }
         
         .action-row { display: flex; gap: 8px; }
     </style>
@@ -115,8 +116,8 @@
     <div id="app-wrapper">
         <!-- AUTH SECTION -->
         <div id="auth-section">
-            <h2 style="margin-bottom: 6px; color: #f59e0b; font-size: 1.8rem;">✈️ Aviator Sky</h2>
-            <p style="color:#9ca3af; font-size:0.85rem; margin-bottom: 20px;">Continuous Flight & Trading Engine</p>
+            <h2 style="margin-bottom: 4px; color: #f59e0b; font-size: 1.6rem;">✈️ Aviator Sky</h2>
+            <p style="color:#9ca3af; font-size:0.8rem; margin-bottom: 15px;">Continuous Flight & Random Trading Graph</p>
             
             <div class="auth-tabs">
                 <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
@@ -139,11 +140,11 @@
                 <!-- TOP HUD & SWITCH MODE ROW -->
                 <div class="hud-row card">
                     <div style="text-align: left;">
-                        <div style="color: #9ca3af; font-size: 0.6rem;">Wallet Balance</div>
-                        <div style="font-size: 1.1rem; font-weight: 900;">₹<span id="balance-display">10000</span></div>
+                        <div style="color: #9ca3af; font-size: 0.55rem;">Wallet Balance</div>
+                        <div style="font-size: 1rem; font-weight: 900;">₹<span id="balance-display">10000</span></div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span id="mode-display" style="background: #374151; padding: 4px 10px; border-radius: 6px; color: #60a5fa; font-size: 0.7rem; font-weight: 800;">DEMO</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span id="mode-display" style="background: #374151; padding: 3px 8px; border-radius: 4px; color: #60a5fa; font-size: 0.65rem; font-weight: 800;">DEMO</span>
                         <button class="btn-secondary" onclick="switchMode()">Switch Mode</button>
                     </div>
                 </div>
@@ -156,19 +157,19 @@
 
                 <!-- DEPOSIT PANEL WITH IMMEDIATE QR CODE SCANNER -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                    <h4 style="margin: 0 0 6px 0; color: #10b981; font-size: 0.8rem;">Instant UPI QR Code Scanner (₹200)</h4>
-                    <div style="background:#fff; padding:4px; display:inline-block; border-radius:6px;">
-                        <img id="qr-code-img" alt="UPI QR" style="width:110px; height:110px; display:block;" />
+                    <h4 style="margin: 0 0 4px 0; color: #10b981; font-size: 0.75rem;">Instant UPI QR Scanner (₹200)</h4>
+                    <div style="background:#fff; padding:3px; display:inline-block; border-radius:4px;">
+                        <img id="qr-code-img" alt="UPI QR" style="width:90px; height:90px; display:block;" />
                     </div>
-                    <p style="font-size:0.7rem; color:#9ca3af; margin:4px 0 0 0;">Scan with GPay/PhonePe/Paytm to instantly credit real funds</p>
+                    <p style="font-size:0.65rem; color:#9ca3af; margin:3px 0 0 0;">Scan with GPay/PhonePe to credit real funds</p>
                 </div>
 
                 <!-- WITHDRAW PANEL -->
                 <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
-                    <h4 style="margin: 0 0 6px 0; color: #ef4444; font-size: 0.8rem;">Withdraw Funds (Min ₹200)</h4>
-                    <input type="number" id="withdraw-amt" placeholder="Enter withdrawal amount (Min 200)">
-                    <input type="text" id="withdraw-upi" placeholder="Enter your UPI ID (e.g. name@paytm)">
-                    <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Withdrawal Request</button>
+                    <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size: 0.75rem;">Withdraw Funds (Min ₹200)</h4>
+                    <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 200)">
+                    <input type="text" id="withdraw-upi" placeholder="Enter UPI ID (e.g. name@paytm)">
+                    <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Withdrawal</button>
                 </div>
 
                 <!-- BUY & SELL CONTROLS SECTION -->
@@ -177,7 +178,7 @@
                         <button class="trade-btn-buy" onclick="handleBuy()">BUY (₹50)</button>
                         <button class="trade-btn-sell" onclick="handleSell()">SELL</button>
                     </div>
-                    <p id="trade-status">Ready to trade! Click BUY to place ₹50 position.</p>
+                    <p id="trade-status">Ready! Click BUY to stake ₹50 position.</p>
                 </div>
             </div>
         </div>
@@ -188,7 +189,7 @@
         let demoBalance = 10000;
         let realBalance = 0;
         let authMode = 'login';
-        const TRADE_FEE_OR_AMOUNT = 50; // Fixed ₹50 fee/bet for both buy & sell trade actions
+        const TRADE_FEE_OR_AMOUNT = 50; 
         const MERCHANT_UPI_VPA = "9685008188-4@ybl"; 
 
         let activeTradePlaced = false;
@@ -237,7 +238,6 @@
             isDemoMode = !isDemoMode;
             updateUI();
             if(!isDemoMode) {
-                // Automatically open deposit panel and show QR scanner immediately upon switching to REAL mode
                 togglePanel('deposit-panel', true);
             }
         }
@@ -272,17 +272,17 @@
                 return;
             }
             if(amt > realBalance) {
-                showCustomMessage("Insufficient real wallet balance to withdraw this amount!");
+                showCustomMessage("Insufficient real wallet balance!");
                 return;
             }
             if(!upiId || !upiId.includes('@')) {
-                showCustomMessage("Please enter a valid destination UPI ID (e.g., username@paytm)!");
+                showCustomMessage("Please enter a valid UPI ID (e.g., name@paytm)!");
                 return;
             }
 
             realBalance -= amt;
             updateUI();
-            showCustomMessage(`Withdrawal request of ₹${amt} to UPI ID '${upiId}' submitted successfully!`);
+            showCustomMessage(`Withdrawal of ₹${amt} to '${upiId}' requested successfully!`);
             togglePanel('');
         }
 
@@ -290,9 +290,12 @@
             document.getElementById('trade-status').innerText = msg;
         }
 
-        // --- PixiJS Continuous Flight & Glowing Trail Graph Engine ---
+        // --- PixiJS Slow, Random Trading Graph Flight Engine ---
         let app, mainPlane, skyContainer, tinyClouds = [], trailGraphics;
         let flightHistoryPoints = [];
+        let targetOffsetY = 0;
+        let currentOffsetY = 0;
+        let nextRandomTimer = 0;
 
         function initPixiGraphics() {
             const container = document.getElementById('game-canvas-container');
@@ -307,54 +310,50 @@
             skyContainer = new PIXI.Container();
             app.stage.addChild(skyContainer);
 
-            // Background sky gradient simulation block
             const bg = new PIXI.Graphics();
             bg.beginFill(0x0f172a);
             bg.drawRect(0, 0, app.screen.width, app.screen.height);
             bg.endFill();
             skyContainer.addChild(bg);
 
-            // Generate moving clouds in background
-            for(let i=0; i<8; i++) {
-                createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * (app.screen.height - 40) + 20);
+            for(let i=0; i<6; i++) {
+                createTinyCloud(Math.random() * app.screen.width * 2, Math.random() * (app.screen.height - 20) + 10);
             }
 
-            // Glowing green trajectory graph line behind the aeroplane
             trailGraphics = new PIXI.Graphics();
             skyContainer.addChild(trailGraphics);
 
             // Aeroplane Sprite creation
             const planeGfx = new PIXI.Graphics();
-            planeGfx.beginFill(0xf59e0b); // Fuselage
-            planeGfx.drawRoundedRect(-16, -5, 36, 12, 3);
+            planeGfx.beginFill(0xf59e0b); 
+            planeGfx.drawRoundedRect(-14, -4, 32, 10, 2);
             planeGfx.endFill();
-            planeGfx.beginFill(0xf8fafc); // Wings
-            planeGfx.moveTo(-2, -3); planeGfx.lineTo(8, -18); planeGfx.lineTo(14, -3);
-            planeGfx.moveTo(-2, 3); planeGfx.lineTo(8, 18); planeGfx.lineTo(14, 3);
+            planeGfx.beginFill(0xf8fafc); 
+            planeGfx.moveTo(-2, -2); planeGfx.lineTo(6, -14); planeGfx.lineTo(12, -2);
+            planeGfx.moveTo(-2, 2); planeGfx.lineTo(6, 14); planeGfx.lineTo(12, 2);
             planeGfx.endFill();
-            planeGfx.beginFill(0xef4444); // Tail wing
-            planeGfx.moveTo(-14, -5); planeGfx.lineTo(-20, -12); planeGfx.lineTo(-8, -5);
+            planeGfx.beginFill(0xef4444); 
+            planeGfx.moveTo(-12, -4); planeGfx.lineTo(-18, -10); planeGfx.lineTo(-6, -4);
             planeGfx.endFill();
 
             mainPlane = new PIXI.Container();
             mainPlane.addChild(planeGfx);
-            mainPlane.x = app.screen.width * 0.35;
+            mainPlane.x = app.screen.width * 0.3;
             mainPlane.y = app.screen.height * 0.5;
-            mainPlane.scale.set(0.5);
-            mainPlane.rotation = -0.15;
+            mainPlane.scale.set(0.42);
+            mainPlane.rotation = 0;
 
             skyContainer.addChild(mainPlane);
 
-            // Start continuous flight loop
-            app.ticker.add(continuousFlightTicker);
+            app.ticker.add(slowRandomGraphFlightTicker);
         }
 
         function createTinyCloud(x, y) {
             const cloud = new PIXI.Graphics();
-            cloud.beginFill(0xffffff, 0.2);
-            cloud.drawCircle(0, 0, 4);
-            cloud.drawCircle(6, -3, 6);
-            cloud.drawCircle(12, 0, 4);
+            cloud.beginFill(0xffffff, 0.18);
+            cloud.drawCircle(0, 0, 3);
+            cloud.drawCircle(5, -2, 5);
+            cloud.drawCircle(10, 0, 3);
             cloud.endFill();
             cloud.x = x;
             cloud.y = y;
@@ -362,28 +361,38 @@
             tinyClouds.push(cloud);
         }
 
-        function continuousFlightTicker() {
-            flightTime += 0.03;
+        function slowRandomGraphFlightTicker() {
+            flightTime += 0.015; // Slowed down overall speed as requested
 
-            // Move clouds backwards to simulate forward airplane movement
+            // Slowly scroll clouds backwards
             tinyClouds.forEach(c => {
-                c.x -= 1.8;
-                if(c.x < -40) c.x = app.screen.width + 40;
+                c.x -= 0.8;
+                if(c.x < -30) c.x = app.screen.width + 30;
             });
 
-            // Aeroplane subtly shifts its height upward and downward on a small scale continuously
-            const baseCenterY = app.screen.height * 0.5;
-            const verticalWave = Math.sin(flightTime * 1.5) * 35; // Small scale vertical floating
-            mainPlane.y = baseCenterY + verticalWave;
-            mainPlane.rotation = Math.cos(flightTime * 1.5) * 0.08; // Subtle pitch adjustment
+            // Periodically pick new random vertical targets for organic trading graph movement (small steps)
+            nextRandomTimer--;
+            if (nextRandomTimer <= 0) {
+                nextRandomTimer = 70 + Math.floor(Math.random() * 60); // Every few seconds
+                // Random upward or downward step within bounds
+                targetOffsetY = (Math.random() * 35) - 17; 
+            }
 
-            // Update Multiplier display naturally
-            currentMultiplier = (1.0 + (flightTime * 0.15)).toFixed(2);
+            // Smoothly interpolate current height towards target random offset (easing)
+            currentOffsetY += (targetOffsetY - currentOffsetY) * 0.03;
+            const baseY = app.screen.height * 0.55;
+            mainPlane.y = baseY + currentOffsetY;
+
+            // Subtle angle tilt based on vertical movement direction
+            mainPlane.rotation = (targetOffsetY - currentOffsetY) * 0.015;
+
+            // Multiplier progression
+            currentMultiplier = (1.0 + (flightTime * 0.08)).toFixed(2);
             document.getElementById('multiplier-overlay').innerText = currentMultiplier + "X";
 
-            // Track graph history points for the green glowing trail behind the aeroplane
+            // Track graph history points for the green glowing trail line behind the airplane
             flightHistoryPoints.push({ x: mainPlane.x, y: mainPlane.y });
-            if (flightHistoryPoints.length > 70) {
+            if (flightHistoryPoints.length > 90) {
                 flightHistoryPoints.shift();
             }
 
@@ -391,56 +400,53 @@
             trailGraphics.clear();
             if (flightHistoryPoints.length > 2) {
                 // Outer glow
-                trailGraphics.lineStyle(6, 0x10b981, 0.35);
+                trailGraphics.lineStyle(5, 0x10b981, 0.3);
                 trailGraphics.moveTo(flightHistoryPoints[0].x, flightHistoryPoints[0].y);
                 for(let pt of flightHistoryPoints) {
                     trailGraphics.lineTo(pt.x, pt.y);
                 }
 
                 // Inner bright green core line
-                trailGraphics.lineStyle(2.5, 0x34d399, 1);
+                trailGraphics.lineStyle(2, 0x34d399, 1);
                 trailGraphics.moveTo(flightHistoryPoints[0].x, flightHistoryPoints[0].y);
                 for(let pt of flightHistoryPoints) {
                     trailGraphics.lineTo(pt.x, pt.y);
                 }
             }
 
-            // Random automated market fluctuations / micro-crashes for trading simulation
-            if (activeTradePlaced && Math.random() < 0.012) {
-                evaluateTradeOutcome(Math.random() > 0.45); // Win or lose depending on random upward/downward beat
+            // Automated market check for active trade
+            if (activeTradePlaced && Math.random() < 0.01) {
+                evaluateTradeOutcome(Math.random() > 0.4);
             }
         }
 
         function handleBuy() {
             let activeBal = isDemoMode ? demoBalance : realBalance;
             if(activeBal < TRADE_FEE_OR_AMOUNT) {
-                showCustomMessage("Insufficient wallet balance for BUY (₹50 fee required)!");
+                showCustomMessage("Insufficient balance for BUY (₹50 fee)!");
                 return;
             }
 
-            // Deduct ₹50 trading fee/amount for BUY action
             if(isDemoMode) demoBalance -= TRADE_FEE_OR_AMOUNT;
             else realBalance -= TRADE_FEE_OR_AMOUNT;
             updateUI();
 
             activeTradePlaced = true;
-            showCustomMessage("📈 BUY position active (₹50 staked). Waiting for upward market beat...");
+            showCustomMessage("📈 BUY position active (₹50 staked). Waiting for upward graph movement...");
         }
 
         function handleSell() {
             let activeBal = isDemoMode ? demoBalance : realBalance;
             if(activeBal < TRADE_FEE_OR_AMOUNT) {
-                showCustomMessage("Insufficient wallet balance for SELL (₹50 fee required)!");
+                showCustomMessage("Insufficient balance for SELL (₹50 fee)!");
                 return;
             }
 
-            // Deduct ₹50 trading fee/amount for SELL action
             if(isDemoMode) demoBalance -= TRADE_FEE_OR_AMOUNT;
             else realBalance -= TRADE_FEE_OR_AMOUNT;
             updateUI();
 
-            // Executing SELL action (User profits if aeroplane goes upward on beat, or gets loss on downward)
-            let isUpwardProfit = (Math.random() > 0.3); // High probability of profit when user times SELL on beat
+            let isUpwardProfit = (Math.random() > 0.3);
             evaluateTradeOutcome(isUpwardProfit);
         }
 
@@ -449,16 +455,14 @@
             activeTradePlaced = false;
 
             if (isWin) {
-                // Player gets profit of ₹100 (net gain over ₹50 fee)
                 const payout = 100;
                 if(isDemoMode) demoBalance += payout;
                 else realBalance += payout;
                 updateUI();
-                showCustomMessage(`✨ SUCCESS! Aeroplane went upward. You won ₹${payout}!`);
+                showCustomMessage(`✨ SUCCESS! Graph moved upward. You won ₹${payout}!`);
             } else {
-                // Player gets ₹50 lost
                 updateUI();
-                showCustomMessage(`💥 MARKET CRASH! Aeroplane went downward. Lost ₹${TRADE_FEE_OR_AMOUNT}.`);
+                showCustomMessage(`💥 MARKET DROP! Graph moved downward. Lost ₹${TRADE_FEE_OR_AMOUNT}.`);
             }
         }
     </script>
