@@ -32,7 +32,6 @@
             overflow: hidden;
         }
 
-        /* Minimized and compact game canvas height as requested */
         #game-canvas-container {
             width: 100%;
             height: 22vh;
@@ -40,6 +39,7 @@
             background: #030712;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
             flex-shrink: 0;
+            cursor: pointer;
         }
 
         #multiplier-overlay {
@@ -55,6 +55,37 @@
             border: 1px solid rgba(52, 211, 153, 0.3);
             pointer-events: none;
             z-index: 10;
+        }
+
+        #top-notification {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(3, 7, 18, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+
+        #timer-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: #f59e0b;
+            background: rgba(3, 7, 18, 0.85);
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            pointer-events: none;
+            z-index: 10;
+            display: none;
         }
 
         #ui-overlay {
@@ -117,7 +148,7 @@
         <!-- AUTH SECTION -->
         <div id="auth-section">
             <h2 style="margin-bottom: 4px; color: #f59e0b; font-size: 1.6rem;">✈️ Aviator Sky</h2>
-            <p style="color:#9ca3af; font-size:0.8rem; margin-bottom: 15px;">Continuous Flight & Random Trading Graph</p>
+            <p style="color:#9ca3af; font-size:0.8rem; margin-bottom: 15px;">Continuous Flight & Horizontal Reference Line Trading</p>
             
             <div class="auth-tabs">
                 <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
@@ -132,7 +163,9 @@
         <!-- MAIN GAME DASHBOARD -->
         <div id="game-section" class="hidden" style="display:flex; flex-direction:column; width:100%; height:100%;">
             <div id="game-canvas-container">
+                <div id="top-notification"></div>
                 <div id="multiplier-overlay">1.00X</div>
+                <div id="timer-overlay">⏱️ 5s</div>
                 <canvas id="pixi-canvas"></canvas>
             </div>
 
@@ -155,7 +188,7 @@
                      <button id="withdraw-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
 
-                <!-- DEPOSIT PANEL WITH IMMEDIATE QR CODE SCANNER -->
+                <!-- DEPOSIT PANEL -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
                     <h4 style="margin: 0 0 4px 0; color: #10b981; font-size: 0.75rem;">Instant UPI QR Scanner (₹200)</h4>
                     <div style="background:#fff; padding:3px; display:inline-block; border-radius:4px;">
@@ -178,7 +211,7 @@
                         <button class="trade-btn-buy" onclick="handleBuy()">BUY (₹50)</button>
                         <button class="trade-btn-sell" onclick="handleSell()">SELL</button>
                     </div>
-                    <p id="trade-status">Ready! Click BUY to stake ₹50 position.</p>
+                    <p id="trade-status">Ready! Click BUY/SELL or tap canvas to set position.</p>
                 </div>
             </div>
         </div>
@@ -195,6 +228,9 @@
         let activeTradePlaced = false;
         let currentMultiplier = 1.0;
         let flightTime = 0;
+        let tradeTimerInterval = null;
+        let activeTradeType = null; // 'BUY' or 'SELL'
+        let customEntryY = null;    // Canvas Y coordinate for reference line
 
         function switchAuthTab(mode) {
             authMode = mode;
@@ -290,8 +326,20 @@
             document.getElementById('trade-status').innerText = msg;
         }
 
-        // --- PixiJS Slow, Random Trading Graph Flight Engine ---
-        let app, mainPlane, skyContainer, tinyClouds = [], trailGraphics;
+        function showTopNotification(text, isWin) {
+            const notif = document.getElementById('top-notification');
+            notif.innerText = text;
+            notif.style.color = isWin ? "#34d399" : "#ef4444";
+            notif.style.borderColor = isWin ? "rgba(52, 211, 153, 0.4)" : "rgba(239, 68, 68, 0.4)";
+            notif.style.display = 'block';
+            
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 4000);
+        }
+
+        // --- PixiJS Graph Flight Engine & Reference Line ---
+        let app, mainPlane, skyContainer, tinyClouds = [], trailGraphics, refLineGraphics;
         let flightHistoryPoints = [];
         let targetOffsetY = 0;
         let currentOffsetY = 0;
@@ -323,6 +371,9 @@
             trailGraphics = new PIXI.Graphics();
             skyContainer.addChild(trailGraphics);
 
+            refLineGraphics = new PIXI.Graphics();
+            skyContainer.addChild(refLineGraphics);
+
             // Aeroplane Sprite creation
             const planeGfx = new PIXI.Graphics();
             planeGfx.beginFill(0xf59e0b); 
@@ -345,6 +396,16 @@
 
             skyContainer.addChild(mainPlane);
 
+            // Allow clicking on canvas to set horizontal entry line position
+            container.addEventListener('click', (e) => {
+                const rect = container.getBoundingClientRect();
+                const clickY = e.clientY - rect.top;
+                customEntryY = clickY;
+                if(activeTradePlaced) {
+                    showCustomMessage(`Reference Line updated to Y: ${Math.round(customEntryY)}px`);
+                }
+            });
+
             app.ticker.add(slowRandomGraphFlightTicker);
         }
 
@@ -362,51 +423,40 @@
         }
 
         function slowRandomGraphFlightTicker() {
-            flightTime += 0.015; // Slowed down overall speed as requested
+            flightTime += 0.015;
 
-            // Slowly scroll clouds backwards
             tinyClouds.forEach(c => {
                 c.x -= 0.8;
                 if(c.x < -30) c.x = app.screen.width + 30;
             });
 
-            // Periodically pick new random vertical targets for organic trading graph movement (small steps)
             nextRandomTimer--;
             if (nextRandomTimer <= 0) {
-                nextRandomTimer = 70 + Math.floor(Math.random() * 60); // Every few seconds
-                // Random upward or downward step within bounds
+                nextRandomTimer = 70 + Math.floor(Math.random() * 60);
                 targetOffsetY = (Math.random() * 35) - 17; 
             }
 
-            // Smoothly interpolate current height towards target random offset (easing)
             currentOffsetY += (targetOffsetY - currentOffsetY) * 0.03;
             const baseY = app.screen.height * 0.55;
             mainPlane.y = baseY + currentOffsetY;
-
-            // Subtle angle tilt based on vertical movement direction
             mainPlane.rotation = (targetOffsetY - currentOffsetY) * 0.015;
 
-            // Multiplier progression
             currentMultiplier = (1.0 + (flightTime * 0.08)).toFixed(2);
             document.getElementById('multiplier-overlay').innerText = currentMultiplier + "X";
 
-            // Track graph history points for the green glowing trail line behind the airplane
             flightHistoryPoints.push({ x: mainPlane.x, y: mainPlane.y });
             if (flightHistoryPoints.length > 90) {
                 flightHistoryPoints.shift();
             }
 
-            // Draw glowing green line trail graph at the back of the aeroplane
             trailGraphics.clear();
             if (flightHistoryPoints.length > 2) {
-                // Outer glow
                 trailGraphics.lineStyle(5, 0x10b981, 0.3);
                 trailGraphics.moveTo(flightHistoryPoints[0].x, flightHistoryPoints[0].y);
                 for(let pt of flightHistoryPoints) {
                     trailGraphics.lineTo(pt.x, pt.y);
                 }
 
-                // Inner bright green core line
                 trailGraphics.lineStyle(2, 0x34d399, 1);
                 trailGraphics.moveTo(flightHistoryPoints[0].x, flightHistoryPoints[0].y);
                 for(let pt of flightHistoryPoints) {
@@ -414,16 +464,30 @@
                 }
             }
 
-            // Automated market check for active trade
-            if (activeTradePlaced && Math.random() < 0.01) {
-                evaluateTradeOutcome(Math.random() > 0.4);
+            // Render Horizontal Reference Line if trade is active
+            refLineGraphics.clear();
+            if (activeTradePlaced && customEntryY !== null) {
+                const lineColor = activeTradeType === 'BUY' ? 0x10b981 : 0xef4444;
+                refLineGraphics.lineStyle(2, lineColor, 0.8);
+                refLineGraphics.moveTo(0, customEntryY);
+                refLineGraphics.lineTo(app.screen.width, customEntryY);
             }
         }
 
         function handleBuy() {
+            startTradeSession("BUY");
+        }
+
+        function handleSell() {
+            startTradeSession("SELL");
+        }
+
+        function startTradeSession(type) {
+            if(activeTradePlaced) return;
             let activeBal = isDemoMode ? demoBalance : realBalance;
+
             if(activeBal < TRADE_FEE_OR_AMOUNT) {
-                showCustomMessage("Insufficient balance for BUY (₹50 fee)!");
+                showCustomMessage(`Insufficient balance for ${type} (₹50 fee)!`);
                 return;
             }
 
@@ -432,37 +496,74 @@
             updateUI();
 
             activeTradePlaced = true;
-            showCustomMessage("📈 BUY position active (₹50 staked). Waiting for upward graph movement...");
-        }
-
-        function handleSell() {
-            let activeBal = isDemoMode ? demoBalance : realBalance;
-            if(activeBal < TRADE_FEE_OR_AMOUNT) {
-                showCustomMessage("Insufficient balance for SELL (₹50 fee)!");
-                return;
+            activeTradeType = type;
+            // Default reference line to current plane Y if not clicked on canvas yet
+            if(customEntryY === null) {
+                customEntryY = mainPlane.y;
             }
 
-            if(isDemoMode) demoBalance -= TRADE_FEE_OR_AMOUNT;
-            else realBalance -= TRADE_FEE_OR_AMOUNT;
-            updateUI();
+            showCustomMessage(`📈 ${type} position placed! Reference line set. Waiting 5s...`);
 
-            let isUpwardProfit = (Math.random() > 0.3);
-            evaluateTradeOutcome(isUpwardProfit);
+            let secondsLeft = 5;
+            const timerEl = document.getElementById('timer-overlay');
+            timerEl.innerText = `⏱️ ${secondsLeft}s`;
+            timerEl.style.display = 'block';
+
+            if(tradeTimerInterval) clearInterval(tradeTimerInterval);
+
+            tradeTimerInterval = setInterval(() => {
+                secondsLeft--;
+                if(secondsLeft > 0) {
+                    timerEl.innerText = `⏱️ ${secondsLeft}s`;
+                } else {
+                    clearInterval(tradeTimerInterval);
+                    timerEl.style.display = 'none';
+
+                    // Evaluate outcome comparing final plane Y vs reference line Y
+                    evaluateTradeOutcome();
+                    activeTradePlaced = false;
+                    customEntryY = null;
+                }
+            }, 1000);
         }
 
-        function evaluateTradeOutcome(isWin) {
-            if(!activeTradePlaced && isWin === undefined) return;
-            activeTradePlaced = false;
+        function evaluateTradeOutcome() {
+            const finalPlaneY = mainPlane.y;
+            const diff = finalPlaneY - customEntryY; // Pixel difference
 
-            if (isWin) {
+            // Small epsilon threshold (e.g. 1.5 pixels) to account for exact draw / flat stabilization
+            const EPSILON = 1.5;
+
+            let isWin = false;
+            let isDraw = false;
+
+            if (Math.abs(diff) <= EPSILON) {
+                isDraw = true;
+            } else if (activeTradeType === 'BUY') {
+                // BUY wins if plane goes upwards (Y is smaller on screen coordinates)
+                isWin = finalPlaneY < customEntryY;
+            } else {
+                // SELL wins if plane goes downwards (Y is larger on screen coordinates)
+                isWin = finalPlaneY > customEntryY;
+            }
+
+            if (isDraw) {
+                if(isDemoMode) demoBalance += TRADE_FEE_OR_AMOUNT;
+                else realBalance += TRADE_FEE_OR_AMOUNT;
+                updateUI();
+                showTopNotification(`🤝 Draw! Stake ₹50 Refunded`, true);
+                showCustomMessage(`Match drawn. Stake refunded.`);
+            } else if (isWin) {
                 const payout = 100;
                 if(isDemoMode) demoBalance += payout;
                 else realBalance += payout;
                 updateUI();
-                showCustomMessage(`✨ SUCCESS! Graph moved upward. You won ₹${payout}!`);
+                showTopNotification(`✨ Successfully Won ₹${payout}!`, true);
+                showCustomMessage(`Success! Won ₹${payout}.`);
             } else {
                 updateUI();
-                showCustomMessage(`💥 MARKET DROP! Graph moved downward. Lost ₹${TRADE_FEE_OR_AMOUNT}.`);
+                showTopNotification(`💥 Successfully Lost ₹${TRADE_FEE_OR_AMOUNT}!`, false);
+                showCustomMessage(`Market moved against position! Lost ₹${TRADE_FEE_OR_AMOUNT}.`);
             }
         }
     </script>
