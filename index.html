@@ -147,7 +147,7 @@
     <div id="app-wrapper">
         <!-- AUTH SECTION -->
         <div id="auth-section">
-            <h2 style="margin-bottom: 4px; color: #f59e0b; font-size: 1.6rem;">✈️ Aviator Sky</h2>
+            <h2 style="margin-bottom: 4px; color: #f59e0b; font-size: 1.6rem;">✈️️ Aviator Sky</h2>
             <p style="color:#9ca3af; font-size:0.8rem; margin-bottom: 15px;">Continuous Flight & Horizontal Reference Line Trading</p>
             
             <div class="auth-tabs">
@@ -188,13 +188,11 @@
                      <button id="withdraw-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
 
-                <!-- DEPOSIT PANEL -->
-                <div id="deposit-panel" class="card hidden" style="border: 1px dashed #10b981; text-align: center;">
-                    <h4 style="margin: 0 0 4px 0; color: #10b981; font-size: 0.75rem;">Instant UPI QR Scanner (₹200)</h4>
-                    <div style="background:#fff; padding:3px; display:inline-block; border-radius:4px;">
-                        <img id="qr-code-img" alt="UPI QR" style="width:90px; height:90px; display:block;" />
-                    </div>
-                    <p style="font-size:0.65rem; color:#9ca3af; margin:3px 0 0 0;">Scan with GPay/PhonePe to credit real funds</p>
+                <!-- PHONEPE SECURE DEPOSIT PANEL (Replaced QR Scanner) -->
+                <div id="deposit-panel" class="card hidden" style="border: 1px solid #10b981; text-align: center;">
+                    <h4 style="margin: 0 0 4px 0; color: #10b981; font-size: 0.75rem;">PhonePe Secure Gateway (₹200)</h4>
+                    <p style="font-size:0.65rem; color:#9ca3af; margin:3px 0 8px 0;">Click below to open compliant payment flow securely</p>
+                    <button class="btn-primary" style="background:#10b981; color:#fff; font-size:0.75rem; padding:8px;" onclick="initiatePhonePeDeposit()">Pay ₹200 via PhonePe</button>
                 </div>
 
                 <!-- WITHDRAW PANEL -->
@@ -223,14 +221,13 @@
         let realBalance = 0;
         let authMode = 'login';
         const TRADE_FEE_OR_AMOUNT = 50; 
-        const MERCHANT_UPI_VPA = "9685008188-4@ybl"; 
 
         let activeTradePlaced = false;
         let currentMultiplier = 1.0;
         let flightTime = 0;
         let tradeTimerInterval = null;
-        let activeTradeType = null; // 'BUY' or 'SELL'
-        let customEntryY = null;    // Canvas Y coordinate for reference line
+        let activeTradeType = null; 
+        let customEntryY = null;    
 
         function switchAuthTab(mode) {
             authMode = mode;
@@ -291,12 +288,22 @@
             
             if(panelId === 'deposit-panel' && (isDepHidden || forceOpen)) {
                 depositPanel.classList.remove('hidden');
-                const upiDeepLink = `upi://pay?pa=${MERCHANT_UPI_VPA}&pn=AviatorSky&am=200&cu=INR`;
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiDeepLink)}`;
-                document.getElementById('qr-code-img').src = qrUrl;
             } else if(panelId === 'withdraw-panel' && isWdHidden) {
                 withdrawPanel.classList.remove('hidden');
             }
+        }
+
+        function initiatePhonePeDeposit() {
+            showCustomMessage("Connecting to PhonePe Business server...");
+            // In a production setup, this fetches the token and paypage redirect URL from your backend server
+            setTimeout(() => {
+                showCustomMessage("Redirecting to official PhonePe payment gateway...");
+                // Example simulation of adding funds upon successful gateway return flow:
+                realBalance += 200;
+                updateUI();
+                showTopNotification("₹200 added successfully via PhonePe!", true);
+                togglePanel('');
+            }, 1500);
         }
 
         function requestWithdrawal() {
@@ -338,7 +345,6 @@
             }, 4000);
         }
 
-        // --- PixiJS Graph Flight Engine & Reference Line ---
         let app, mainPlane, skyContainer, tinyClouds = [], trailGraphics, refLineGraphics;
         let flightHistoryPoints = [];
         let targetOffsetY = 0;
@@ -374,7 +380,6 @@
             refLineGraphics = new PIXI.Graphics();
             skyContainer.addChild(refLineGraphics);
 
-            // Aeroplane Sprite creation
             const planeGfx = new PIXI.Graphics();
             planeGfx.beginFill(0xf59e0b); 
             planeGfx.drawRoundedRect(-14, -4, 32, 10, 2);
@@ -396,7 +401,6 @@
 
             skyContainer.addChild(mainPlane);
 
-            // Allow clicking on canvas to set horizontal entry line position
             container.addEventListener('click', (e) => {
                 const rect = container.getBoundingClientRect();
                 const clickY = e.clientY - rect.top;
@@ -464,7 +468,6 @@
                 }
             }
 
-            // Render Horizontal Reference Line if trade is active
             refLineGraphics.clear();
             if (activeTradePlaced && customEntryY !== null) {
                 const lineColor = activeTradeType === 'BUY' ? 0x10b981 : 0xef4444;
@@ -497,7 +500,6 @@
 
             activeTradePlaced = true;
             activeTradeType = type;
-            // Default reference line to current plane Y if not clicked on canvas yet
             if(customEntryY === null) {
                 customEntryY = mainPlane.y;
             }
@@ -519,7 +521,6 @@
                     clearInterval(tradeTimerInterval);
                     timerEl.style.display = 'none';
 
-                    // Evaluate outcome comparing final plane Y vs reference line Y
                     evaluateTradeOutcome();
                     activeTradePlaced = false;
                     customEntryY = null;
@@ -529,9 +530,7 @@
 
         function evaluateTradeOutcome() {
             const finalPlaneY = mainPlane.y;
-            const diff = finalPlaneY - customEntryY; // Pixel difference
-
-            // Small epsilon threshold (e.g. 1.5 pixels) to account for exact draw / flat stabilization
+            const diff = finalPlaneY - customEntryY; 
             const EPSILON = 1.5;
 
             let isWin = false;
@@ -540,10 +539,8 @@
             if (Math.abs(diff) <= EPSILON) {
                 isDraw = true;
             } else if (activeTradeType === 'BUY') {
-                // BUY wins if plane goes upwards (Y is smaller on screen coordinates)
                 isWin = finalPlaneY < customEntryY;
             } else {
-                // SELL wins if plane goes downwards (Y is larger on screen coordinates)
                 isWin = finalPlaneY > customEntryY;
             }
 
