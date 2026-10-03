@@ -147,7 +147,7 @@
     <div id="app-wrapper">
         <!-- AUTH SECTION -->
         <div id="auth-section">
-            <h2 style="margin-bottom: 4px; color: #f59e0b; font-size: 1.6rem;">✈️️ Aviator Sky</h2>
+            <h2 style="margin-bottom: 4px; color: #f59e0b; font-size: 1.6rem;">✈ Aviator Sky</h2>
             <p style="color:#9ca3af; font-size:0.8rem; margin-bottom: 15px;">Continuous Flight & Horizontal Reference Line Trading</p>
             
             <div class="auth-tabs">
@@ -188,7 +188,7 @@
                      <button id="withdraw-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
 
-                <!-- PHONEPE SECURE DEPOSIT PANEL (Replaced QR Scanner) -->
+                <!-- PHONEPE SECURE DEPOSIT PANEL -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px solid #10b981; text-align: center;">
                     <h4 style="margin: 0 0 4px 0; color: #10b981; font-size: 0.75rem;">PhonePe Secure Gateway (₹200)</h4>
                     <p style="font-size:0.65rem; color:#9ca3af; margin:3px 0 8px 0;">Click below to open compliant payment flow securely</p>
@@ -293,17 +293,35 @@
             }
         }
 
-        function initiatePhonePeDeposit() {
-            showCustomMessage("Connecting to PhonePe Business server...");
-            // In a production setup, this fetches the token and paypage redirect URL from your backend server
-            setTimeout(() => {
-                showCustomMessage("Redirecting to official PhonePe payment gateway...");
-                // Example simulation of adding funds upon successful gateway return flow:
-                realBalance += 200;
-                updateUI();
-                showTopNotification("₹200 added successfully via PhonePe!", true);
-                togglePanel('');
-            }, 1500);
+        // Updated PhonePe deposit method connecting to backend server flow
+        async function initiatePhonePeDeposit() {
+            showCustomMessage("Connecting to secure payment server...");
+            
+            try {
+                const response = await fetch('https://your-backend-server.com/api/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: 200,
+                        userId: document.getElementById('phone').value || "user_guest"
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.redirectUrl) {
+                    showCustomMessage("Redirecting to PhonePe gateway...");
+                    // Redirects user to the actual PhonePe payment gateway page
+                    window.location.href = data.redirectUrl;
+                } else {
+                    showCustomMessage("Failed to initiate payment. Please check backend configuration.");
+                }
+            } catch (error) {
+                console.error("Payment error:", error);
+                showCustomMessage("Network error connecting to payment gateway server.");
+            }
         }
 
         function requestWithdrawal() {
