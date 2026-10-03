@@ -191,12 +191,11 @@
                 <!-- QR CODE SCANNER DEPOSIT PANEL -->
                 <div id="deposit-panel" class="card hidden" style="border: 1px solid #10b981; text-align: center;">
                     <h4 style="margin: 0 0 4px 0; color: #10b981; font-size: 0.75rem;">Scan & Pay ₹200</h4>
-                    <p style="font-size:0.65rem; color:#9ca3af; margin:3px 0 8px 0;">Scan this QR code using any UPI app to deposit</p>
+                    <p style="font-size:0.65rem; color:#9ca3af; margin:3px 0 8px 0;">Scan using PhonePe or any UPI app (UPI ID: 9685008188-4@ybl)</p>
                     <div style="background: #fff; padding: 10px; display: inline-block; border-radius: 6px; margin-bottom: 6px;">
-                        <!-- Replace 'your-qr-code.png' with your actual QR code image filename -->
-                        <img src="your-qr-code.png" alt="QR Code" style="width: 120px; height: 120px; display: block;">
+                        <!-- Make sure your QR image file is saved in your project folder and named 'my-qr-code.png' -->
+                        <img src="my-qr-code.png" alt="My UPI QR Code" style="width: 140px; height: 140px; display: block; object-fit: contain;">
                     </div>
-                    <button class="btn-primary" style="background:#10b981; color:#fff; font-size:0.7rem; padding:6px;" onclick="simulateManualDeposit()">I Have Paid ₹200 (Verify)</button>
                 </div>
 
                 <!-- WITHDRAW PANEL -->
@@ -295,14 +294,6 @@
             } else if(panelId === 'withdraw-panel' && isWdHidden) {
                 withdrawPanel.classList.remove('hidden');
             }
-        }
-
-        function simulateManualDeposit() {
-            realBalance += 200;
-            updateUI();
-            showTopNotification("₹200 added to real wallet successfully!", true);
-            showCustomMessage("Deposit verified and credited!");
-            togglePanel('');
         }
 
         function requestWithdrawal() {
