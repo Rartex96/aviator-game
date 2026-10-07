@@ -279,8 +279,12 @@
 
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('game-section').classList.remove('hidden');
-            initPixiGraphics();
-            updateUI();
+            
+            // Fixed: Allow the browser to calculate layout before initializing canvas dimensions
+            requestAnimationFrame(() => {
+                initPixiGraphics();
+                updateUI();
+            });
         }
 
         function saveUserData() {
@@ -497,7 +501,6 @@
         function startTradeSession(type) {
             if(activeTradePlaced) return;
             
-            // Deduct from trial balance first if available, otherwise real balance
             let useTrial = trialBalance >= TRADE_FEE_OR_AMOUNT;
             let activeBal = useTrial ? trialBalance : realBalance;
 
