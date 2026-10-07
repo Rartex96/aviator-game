@@ -148,7 +148,7 @@
         <!-- AUTH SECTION -->
         <div id="auth-section">
             <h2 style="margin-bottom: 4px; color: #f59e0b; font-size: 1.6rem;">✈️ Aviator Sky</h2>
-            <p style="color:#9ca3af; font-size:0.8rem; margin-bottom: 15px;">Continuous Flight & Horizontal Reference Line Trading</p>
+            <p style="color:#9ca3af; font-size:0.8rem; margin-bottom: 15px;">Real Trading Mode</p>
             
             <div class="auth-tabs">
                 <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
@@ -156,7 +156,7 @@
             </div>
 
             <input type="tel" id="phone" placeholder="Phone Number (10 digits)" maxlength="10">
-            <input type="password" id="password" placeholder="Account Password">
+            <input type="password" id="password" placeholder="Password (6 digits)" maxlength="6">
             <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Login to Account</button>
         </div>
 
@@ -170,20 +170,20 @@
             </div>
 
             <div id="ui-overlay">
-                <!-- TOP HUD & SWITCH MODE ROW -->
+                <!-- TOP HUD -->
                 <div class="hud-row card">
                     <div style="text-align: left;">
-                        <div style="color: #9ca3af; font-size: 0.55rem;">Wallet Balance</div>
-                        <div style="font-size: 1rem; font-weight: 900;">₹<span id="balance-display">10000</span></div>
+                        <div style="color: #9ca3af; font-size: 0.55rem;">Real Balance</div>
+                        <div style="font-size: 1rem; font-weight: 900;">₹<span id="balance-display">0</span></div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span id="mode-display" style="background: #374151; padding: 3px 8px; border-radius: 4px; color: #60a5fa; font-size: 0.65rem; font-weight: 800;">DEMO</span>
-                        <button class="btn-secondary" onclick="switchMode()">Switch Mode</button>
+                    <div style="text-align: right;">
+                        <div style="color: #9ca3af; font-size: 0.55rem;">Trial Bonus (Non-Withdrawable)</div>
+                        <div style="font-size: 1rem; font-weight: 900; color: #f59e0b;">₹<span id="trial-balance-display">100</span></div>
                     </div>
                 </div>
                 
-                <!-- REAL-MODE ONLY ACTION ROW -->
-                <div id="real-actions-container" class="action-row hidden">
+                <!-- REAL-MODE ACTION ROW -->
+                <div id="real-actions-container" class="action-row">
                      <button id="deposit-toggle-btn" class="btn-secondary" style="flex:1; background:#10b981;" onclick="togglePanel('deposit-panel')">Deposit (₹200)</button>
                      <button id="withdraw-toggle-btn" class="btn-secondary" style="flex:1;" onclick="togglePanel('withdraw-panel')">Withdraw</button>
                 </div>
@@ -199,8 +199,8 @@
 
                 <!-- WITHDRAW PANEL -->
                 <div id="withdraw-panel" class="card hidden" style="border: 1px dashed #ef4444;">
-                    <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size: 0.75rem;">Withdraw Funds (Min ₹200)</h4>
-                    <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 200)">
+                    <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size: 0.75rem;">Withdraw Funds (Min ₹300)</h4>
+                    <input type="number" id="withdraw-amt" placeholder="Enter amount (Min 300)">
                     <input type="text" id="withdraw-upi" placeholder="Enter UPI ID (e.g. name@paytm)">
                     <button class="btn-withdraw" onclick="requestWithdrawal()">Submit Withdrawal</button>
                 </div>
@@ -218,10 +218,10 @@
     </div>
 
     <script>
-        let isDemoMode = true;
-        let demoBalance = 10000;
-        let realBalance = 0;
         let authMode = 'login';
+        let currentUserPhone = null;
+        let realBalance = 0;
+        let trialBalance = 100;
         const TRADE_FEE_OR_AMOUNT = 50; 
         const MERCHANT_UPI_VPA = "9685008188-4@ybl"; 
 
@@ -229,8 +229,8 @@
         let currentMultiplier = 1.0;
         let flightTime = 0;
         let tradeTimerInterval = null;
-        let activeTradeType = null; // 'BUY' or 'SELL'
-        let customEntryY = null;    // Canvas Y coordinate for reference line
+        let activeTradeType = null;
+        let customEntryY = null;
 
         function switchAuthTab(mode) {
             authMode = mode;
@@ -240,46 +240,66 @@
         }
 
         function handleAuth() {
-            const phone = document.getElementById('phone').value;
-            const pass = document.getElementById('password').value;
-            if(phone.length === 10 && pass.length > 0) {
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('game-section').classList.remove('hidden');
-                initPixiGraphics();
-                updateUI();
+            const phone = document.getElementById('phone').value.trim();
+            const pass = document.getElementById('password').value.trim();
+
+            if (phone.length !== 10 || isNaN(phone)) {
+                showCustomMessage("Phone number must be exactly 10 digits.");
+                return;
+            }
+            if (pass.length !== 6 || isNaN(pass)) {
+                showCustomMessage("Password must be exactly 6 digits.");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('aviator_users') || '{}');
+
+            if (authMode === 'signup') {
+                if (users[phone]) {
+                    showCustomMessage("Account already exists! Please login.");
+                    return;
+                }
+                users[phone] = { password: pass, realBalance: 0, trialBalance: 100 };
+                localStorage.setItem('aviator_users', JSON.stringify(users));
+                showCustomMessage("Account created successfully with ₹100 trial bonus!");
             } else {
-                showCustomMessage("Please enter a valid 10-digit phone number and password.");
+                if (!users[phone]) {
+                    showCustomMessage("Account not found. Please sign up first.");
+                    return;
+                }
+                if (users[phone].password !== pass) {
+                    showCustomMessage("Incorrect 6-digit password.");
+                    return;
+                }
+            }
+
+            currentUserPhone = phone;
+            realBalance = users[phone].realBalance;
+            trialBalance = users[phone].trialBalance;
+
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('game-section').classList.remove('hidden');
+            initPixiGraphics();
+            updateUI();
+        }
+
+        function saveUserData() {
+            if (!currentUserPhone) return;
+            let users = JSON.parse(localStorage.getItem('aviator_users') || '{}');
+            if (users[currentUserPhone]) {
+                users[currentUserPhone].realBalance = realBalance;
+                users[currentUserPhone].trialBalance = trialBalance;
+                localStorage.setItem('aviator_users', JSON.stringify(users));
             }
         }
 
         function updateUI() {
-            document.getElementById('balance-display').innerText = isDemoMode ? demoBalance : realBalance;
-            const modeEl = document.getElementById('mode-display');
-            const realActionsEl = document.getElementById('real-actions-container');
-
-            if (isDemoMode) {
-                modeEl.innerText = "DEMO";
-                modeEl.style.color = "#60a5fa";
-                realActionsEl.classList.add('hidden');
-                document.getElementById('deposit-panel').classList.add('hidden');
-                document.getElementById('withdraw-panel').classList.add('hidden');
-            } else {
-                modeEl.innerText = "REAL";
-                modeEl.style.color = "#10b981";
-                realActionsEl.classList.remove('hidden');
-            }
-        }
-
-        function switchMode() {
-            isDemoMode = !isDemoMode;
-            updateUI();
-            if(!isDemoMode) {
-                togglePanel('deposit-panel', true);
-            }
+            document.getElementById('balance-display').innerText = realBalance;
+            document.getElementById('trial-balance-display').innerText = trialBalance;
+            saveUserData();
         }
 
         function togglePanel(panelId, forceOpen = false) {
-            if(isDemoMode && panelId === 'deposit-panel') return;
             const depositPanel = document.getElementById('deposit-panel');
             const withdrawPanel = document.getElementById('withdraw-panel');
             
@@ -303,12 +323,12 @@
             const amt = parseInt(document.getElementById('withdraw-amt').value);
             const upiId = document.getElementById('withdraw-upi').value.trim();
 
-            if(isNaN(amt) || amt < 200) {
-                showCustomMessage("Minimum withdrawal amount is ₹200!");
+            if(isNaN(amt) || amt < 300) {
+                showCustomMessage("Minimum withdrawal amount is ₹300!");
                 return;
             }
             if(amt > realBalance) {
-                showCustomMessage("Insufficient real wallet balance!");
+                showCustomMessage("Insufficient real wallet balance! Trial bonus cannot be withdrawn.");
                 return;
             }
             if(!upiId || !upiId.includes('@')) {
@@ -338,7 +358,6 @@
             }, 4000);
         }
 
-        // --- PixiJS Graph Flight Engine & Reference Line ---
         let app, mainPlane, skyContainer, tinyClouds = [], trailGraphics, refLineGraphics;
         let flightHistoryPoints = [];
         let targetOffsetY = 0;
@@ -347,6 +366,7 @@
 
         function initPixiGraphics() {
             const container = document.getElementById('game-canvas-container');
+            if (app) return;
             app = new PIXI.Application({
                 view: document.getElementById('pixi-canvas'),
                 width: container.clientWidth,
@@ -374,7 +394,6 @@
             refLineGraphics = new PIXI.Graphics();
             skyContainer.addChild(refLineGraphics);
 
-            // Aeroplane Sprite creation
             const planeGfx = new PIXI.Graphics();
             planeGfx.beginFill(0xf59e0b); 
             planeGfx.drawRoundedRect(-14, -4, 32, 10, 2);
@@ -396,7 +415,6 @@
 
             skyContainer.addChild(mainPlane);
 
-            // Allow clicking on canvas to set horizontal entry line position
             container.addEventListener('click', (e) => {
                 const rect = container.getBoundingClientRect();
                 const clickY = e.clientY - rect.top;
@@ -464,7 +482,6 @@
                 }
             }
 
-            // Render Horizontal Reference Line if trade is active
             refLineGraphics.clear();
             if (activeTradePlaced && customEntryY !== null) {
                 const lineColor = activeTradeType === 'BUY' ? 0x10b981 : 0xef4444;
@@ -474,30 +491,28 @@
             }
         }
 
-        function handleBuy() {
-            startTradeSession("BUY");
-        }
-
-        function handleSell() {
-            startTradeSession("SELL");
-        }
+        function handleBuy() { startTradeSession("BUY"); }
+        function handleSell() { startTradeSession("SELL"); }
 
         function startTradeSession(type) {
             if(activeTradePlaced) return;
-            let activeBal = isDemoMode ? demoBalance : realBalance;
+            
+            // Deduct from trial balance first if available, otherwise real balance
+            let useTrial = trialBalance >= TRADE_FEE_OR_AMOUNT;
+            let activeBal = useTrial ? trialBalance : realBalance;
 
             if(activeBal < TRADE_FEE_OR_AMOUNT) {
-                showCustomMessage(`Insufficient balance for ${type} (₹50 fee)!`);
+                showCustomMessage(`Insufficient balance for ${type} (₹50 fee)! Please deposit.`);
                 return;
             }
 
-            if(isDemoMode) demoBalance -= TRADE_FEE_OR_AMOUNT;
+            if(useTrial) trialBalance -= TRADE_FEE_OR_AMOUNT;
             else realBalance -= TRADE_FEE_OR_AMOUNT;
+            
             updateUI();
 
             activeTradePlaced = true;
             activeTradeType = type;
-            // Default reference line to current plane Y if not clicked on canvas yet
             if(customEntryY === null) {
                 customEntryY = mainPlane.y;
             }
@@ -518,20 +533,16 @@
                 } else {
                     clearInterval(tradeTimerInterval);
                     timerEl.style.display = 'none';
-
-                    // Evaluate outcome comparing final plane Y vs reference line Y
-                    evaluateTradeOutcome();
+                    evaluateTradeOutcome(useTrial);
                     activeTradePlaced = false;
                     customEntryY = null;
                 }
             }, 1000);
         }
 
-        function evaluateTradeOutcome() {
+        function evaluateTradeOutcome(wasTrial) {
             const finalPlaneY = mainPlane.y;
-            const diff = finalPlaneY - customEntryY; // Pixel difference
-
-            // Small epsilon threshold (e.g. 1.5 pixels) to account for exact draw / flat stabilization
+            const diff = finalPlaneY - customEntryY;
             const EPSILON = 1.5;
 
             let isWin = false;
@@ -540,22 +551,20 @@
             if (Math.abs(diff) <= EPSILON) {
                 isDraw = true;
             } else if (activeTradeType === 'BUY') {
-                // BUY wins if plane goes upwards (Y is smaller on screen coordinates)
                 isWin = finalPlaneY < customEntryY;
             } else {
-                // SELL wins if plane goes downwards (Y is larger on screen coordinates)
                 isWin = finalPlaneY > customEntryY;
             }
 
             if (isDraw) {
-                if(isDemoMode) demoBalance += TRADE_FEE_OR_AMOUNT;
+                if(wasTrial) trialBalance += TRADE_FEE_OR_AMOUNT;
                 else realBalance += TRADE_FEE_OR_AMOUNT;
                 updateUI();
                 showTopNotification(`🤝 Draw! Stake ₹50 Refunded`, true);
                 showCustomMessage(`Match drawn. Stake refunded.`);
             } else if (isWin) {
                 const payout = 100;
-                if(isDemoMode) demoBalance += payout;
+                if(wasTrial) trialBalance += payout;
                 else realBalance += payout;
                 updateUI();
                 showTopNotification(`✨ Successfully Won ₹${payout}!`, true);
